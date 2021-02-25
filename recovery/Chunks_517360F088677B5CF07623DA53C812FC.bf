@@ -61,13 +61,13 @@ namespace BeefSand.lib
 			Particle[,] particles=this[chunk];
 			for (int i = 0; i < chunk.Width/simulationSize; i++)
 			{
-				/*for (int j = 0; j < chunk.Height/simulationSize; j++)
+				for (int j = 0; j < chunk.Height/simulationSize; j++)
 				{
 					if (particles[i, j].id == 1 || particles[i, j].stable)
 						continue;
 					if (particles[i, j].timer - simulationClock != 1)
 						particles[i, j].update(ref particles[i, j], 0);
-				}*/
+				}
 			}
 			simulationClock += 1;
 			if (simulationClock > 254)

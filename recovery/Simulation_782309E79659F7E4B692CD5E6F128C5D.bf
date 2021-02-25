@@ -27,7 +27,7 @@ namespace BeefSand
 			get { return _stable; } set mut
 			{
 				sleepTimer = 0;
-				//_stable = value;
+				_stable = value;
 			}
 		};
 		public Simulation sim;
@@ -108,20 +108,6 @@ namespace BeefSand
 			}
 		}
 
-		public void ExtractColor(rect chunk, ref Color[] array)
-		{
-			Particle[,] particles = chunks[chunk];
-			array = new Color[1952 * 976]();
-			array.Populate(Color.White);
-			for (int i = 0; i < particles.Count; i++)
-			{
-				int x = i % simulationWidth;
-				int y = i / simulationHeight;
-				array[i] = particles[x, y].particleColor;
-			}
-		}
-
-
 		public ~this()
 		{
 			delete (i);
@@ -137,17 +123,28 @@ namespace BeefSand
 			Particle[,] particles = chunks[chunk];
 			if (!withinBounds(chunk, x, y))
 				return;
-			//Get row & column relative to the chunk position
-			int chunkRow=x-chunk.X*4;
-			int chunkColumn=y-chunk.Y*4;
+
+			//Get row & column relative to the chunk position. This is done because if a chunks position isn't 0,0, we need to convert x and y to a position relative to the origin of that chunk
+			int chunkRow=x-(chunk.X*4);
+			int chunkColumn=y-(chunk.Y*4);
 
 			particles[chunkRow, chunkColumn] = value;
 			particles[chunkRow, chunkColumn].pos = .(chunkRow, chunkColumn);
 			particles[chunkRow, chunkColumn].timer = simulationClock + 1;
 			particles[chunkRow, chunkColumn].stable = false;
 
-			for(int i=-3; i<3; i++){
-				//AAAAAAAAAAAAAAAA
+			//Trying to set particles around the one we're setting to be not stable anymore. Causes access violation. I don't know why. Help.
+			for(int i=-3; i<1; i++){
+				for(int j=-3; j<1; j++){
+
+					if(withinBounds(chunk,x+i,y+j)){
+						chunkRow=x-(chunk.X*4);
+						chunkColumn=y-(chunk.Y*4);
+						if(particles[chunkRow+i,chunkColumn+i].id!=0){
+							particles[chunkRow+i,chunkColumn+i].stable=false;
+						}
+					}
+				}
 			}
 			
 			i.SetPixels(.(x, y, 1, 1), scope Color[](value.particleColor));
@@ -174,7 +171,7 @@ namespace BeefSand
 
 
 
-		//Simulate a single frame^
+		//Simulate a single frame
 		public void Simulate(float dT)
 		{
 			rect viewport = Core.Window.RenderBounds;
