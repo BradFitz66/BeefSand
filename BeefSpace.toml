@@ -1,0 +1,11 @@
+FileVersion = 1
+Projects = {BeefSand = {Path = "."}, "Atma.Common" = "*", "Beef.Linq" = "*", "Atma.Entities" = "*"}
+
+[Workspace]
+StartupProject = "BeefSand"
+
+[Configs.Paranoid.Win64]
+BfOptimizationLevel = "O2"
+
+[Configs.Release.Win64]
+BfOptimizationLevel = "OgPlus"

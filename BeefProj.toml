@@ -1,0 +1,6 @@
+FileVersion = 1
+Dependencies = {corlib = "*", "Atma.Common" = "*", "Beef.Linq" = "*", "Atma.Entities" = "*"}
+
+[Project]
+Name = "BeefSand"
+StartupObject = "BeefSand.Program"

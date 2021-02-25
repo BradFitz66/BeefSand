@@ -1,0 +1,180 @@
+FileVersion = 1
+LastConfig = "Release"
+LastPlatform = "Win64"
+RecentFilesList = ["src\\lib\\Simulation.bf", "src\\GameApp.bf", "c:\\Program Files\\BeefLang\\BeefLibs\\Atma.Framework\\src\\Atma.Common\\src\\Graphics\\Images\\Image.bf", "src\\Particles.bf", "src\\lib\\Chunks.bf", "c:\\Program Files\\BeefLang\\BeefLibs\\corlib\\src\\System.bf", "c:\\Program Files\\BeefLang\\BeefLibs\\corlib\\src\\Collections\\Dictionary.bf", "Disassembly", "c:\\Program Files\\BeefLang\\BeefLibs\\corlib\\src\\IO\\FileStream.bf", "src\\Program.bf", "c:\\Program Files\\BeefLang\\BeefLibs\\SDL2\\src\\SDLApp.bf", "Disassembly", "build\\Debug_Win64\\BeefSand\\minkernel\\crts\\ucrt\\src\\appcrt\\internal\\report_runtime_error.cpp", "Disassembly", "Disassembly"]
+
+[MainWindow]
+X = 64
+Y = 26
+Width = 1200
+Height = 1024
+ShowKind = "Maximized"
+
+[MainDockingFrame]
+Type = "DockingFrame"
+SplitType = 2
+
+[[MainDockingFrame.DockedWidgets]]
+RequestedWidth = 350.0
+RequestedHeight = 200.0
+SizePriority = 200.0
+Type = "DockingFrame"
+SplitType = 1
+
+[[MainDockingFrame.DockedWidgets.DockedWidgets]]
+RequestedWidth = 452.2
+RequestedHeight = 200.0
+Type = "TabbedView"
+
+[[MainDockingFrame.DockedWidgets.DockedWidgets.Tabs]]
+Active = true
+TabLabel = "Workspace"
+TabWidth = 115.0
+Type = "ProjectPanel"
+
+[[MainDockingFrame.DockedWidgets.DockedWidgets]]
+IsFillWidget = true
+Permanent = true
+RequestedWidth = 1653.0
+RequestedHeight = 150.0
+SizePriority = 733.0
+DefaultDocumentsTabbedView = true
+Type = "TabbedView"
+
+[[MainDockingFrame.DockedWidgets.DockedWidgets.Tabs]]
+TabLabel = "FileStream.bf"
+TabWidth = 115.0
+Type = "SourceViewPanel"
+FilePath = "c:\\Program Files\\BeefLang\\BeefLibs\\corlib\\src\\IO\\FileStream.bf"
+CursorPos = 1842
+VertPos = 675.0
+ProjectName = "corlib"
+
+[[MainDockingFrame.DockedWidgets.DockedWidgets.Tabs]]
+TabLabel = "Dictionary.bf"
+TabWidth = 103.0
+Type = "SourceViewPanel"
+FilePath = "c:\\Program Files\\BeefLang\\BeefLibs\\corlib\\src\\Collections\\Dictionary.bf"
+CursorPos = 2776
+VertPos = 1770.0
+ProjectName = "corlib"
+
+[[MainDockingFrame.DockedWidgets.DockedWidgets.Tabs]]
+TabLabel = "Particles.bf"
+TabWidth = 93.0
+Type = "SourceViewPanel"
+FilePath = "src\\Particles.bf"
+CursorPos = 3048
+VertPos = 1395.0
+ProjectName = "BeefSand"
+
+[[MainDockingFrame.DockedWidgets.DockedWidgets.Tabs]]
+TabLabel = "Chunks.bf"
+TabWidth = 86.0
+Type = "SourceViewPanel"
+FilePath = "src\\lib\\Chunks.bf"
+CursorPos = 1087
+VertPos = 540.0
+ProjectName = "BeefSand"
+
+[[MainDockingFrame.DockedWidgets.DockedWidgets.Tabs]]
+TabLabel = "System.bf"
+TabWidth = 86.0
+Type = "SourceViewPanel"
+FilePath = "c:\\Program Files\\BeefLang\\BeefLibs\\corlib\\src\\System.bf"
+CursorPos = 2583
+VertPos = 2595.0
+ProjectName = "corlib"
+
+[[MainDockingFrame.DockedWidgets.DockedWidgets.Tabs]]
+Active = true
+TabLabel = "Simulation.bf"
+TabWidth = 105.0
+Type = "SourceViewPanel"
+FilePath = "src\\lib\\Simulation.bf"
+CursorPos = 3251
+VertPos = 1800.0
+ProjectName = "BeefSand"
+
+[[MainDockingFrame.DockedWidgets.DockedWidgets.Tabs]]
+TabLabel = "Image.bf"
+TabWidth = 81.0
+Type = "SourceViewPanel"
+FilePath = "c:\\Program Files\\BeefLang\\BeefLibs\\Atma.Framework\\src\\Atma.Common\\src\\Graphics\\Images\\Image.bf"
+CursorPos = 1466
+VertPos = 780.0
+ProjectName = "Atma.Common"
+
+[[MainDockingFrame.DockedWidgets.DockedWidgets.Tabs]]
+TabLabel = "GameApp.bf"
+TabWidth = 103.0
+Type = "SourceViewPanel"
+FilePath = "src\\GameApp.bf"
+CursorPos = 2080
+VertPos = 900.0
+ProjectName = "BeefSand"
+
+[[MainDockingFrame.DockedWidgets.DockedWidgets.Tabs]]
+TabLabel = "Disassembly"
+TabWidth = 102.0
+Type = "DisassemblyPanel"
+
+[[MainDockingFrame.DockedWidgets.DockedWidgets.Tabs]]
+TabLabel = "Program.bf"
+TabWidth = 96.0
+Type = "SourceViewPanel"
+FilePath = "src\\Program.bf"
+CursorPos = 844
+VertPos = 540.0
+ProjectName = "BeefSand"
+
+[[MainDockingFrame.DockedWidgets]]
+RequestedWidth = 250.0
+RequestedHeight = 250.0
+Type = "TabbedView"
+
+[[MainDockingFrame.DockedWidgets.Tabs]]
+TabLabel = "Find Results"
+TabWidth = 119.0
+Type = "FindResultsPanel"
+
+[[MainDockingFrame.DockedWidgets.Tabs]]
+TabLabel = "Threads"
+TabWidth = 97.0
+Type = "ThreadPanel"
+
+[[MainDockingFrame.DockedWidgets.Tabs]]
+TabLabel = "Call Stack"
+TabWidth = 105.0
+Type = "CallStackPanel"
+
+[[MainDockingFrame.DockedWidgets.Tabs]]
+TabLabel = "Immediate"
+TabWidth = 111.0
+Type = "ImmediatePanel"
+
+[[MainDockingFrame.DockedWidgets.Tabs]]
+Active = true
+TabLabel = "Output"
+TabWidth = 90.0
+Type = "OutputPanel"
+
+[[MainDockingFrame.DockedWidgets.Tabs]]
+TabLabel = "Memory"
+TabWidth = 99.0
+Type = "MemoryPanel"
+AutoResize = "Auto_Mul8"
+RequestedWidth = 300.0
+
+[[MainDockingFrame.DockedWidgets.Tabs]]
+TabLabel = "Watch"
+TabWidth = 86.0
+Type = "WatchPanel"
+Columns = [{Width = 208.0}, {Width = 208.0}, {Width = 208.0}]
+Items = [""]
+
+[[MainDockingFrame.DockedWidgets.Tabs]]
+TabLabel = "Auto"
+TabWidth = 77.0
+Type = "AutoWatchPanel"
+Columns = [{Width = 208.0}, {Width = 208.0}, {Width = 208.0}]
