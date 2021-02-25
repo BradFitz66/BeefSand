@@ -69,104 +69,63 @@ namespace BeefSand
 		//Draw pixels onto texture.
 		public Texture texture;
 		public Atma.Image i;
-		public Chunks chunks;
-		public Color[] c;
+
+		List<Chunk> chunks ~ DeleteContainerAndItems!(_);
 
 
 		public this()
 		{
-			sim = this;
-			chunks = new Chunks();
-			rect testChunk1 = .(0, 0, 976, 976);
-			rect testChunk2 = .(976, 0, 976, 976);
+			sim=this;
+			chunks = new List<Chunk>();
 			chunks.Add(
-				testChunk1
-				);
+				new Chunk(.(0,0,simulationWidth,simulationHeight))
+			);
 			chunks.Add(
-				testChunk2
-				);
-			aabb2 worldAABB = testChunk1.ToAABB();
-			worldAABB.Merge(testChunk2.ToAABB());
-			rect worldSize = worldAABB.ToRect();
-
-			i = new .(worldSize.Width, worldSize.Height);
-
-			c = new Color[1952 * 976]();
-			c.Populate(Color.CornflowerBlue);
-			i.SetPixels(.(0, 0, 1952, 976), c);
-			texture = new Texture(i);
-			texture.Filter = .Nearest;
-
-			chunks.GenerateTerrain();
-		}
-
-		public static void Populate<T>(this T[] arr, T value)
-		{
-			for (int i = 0; i < arr.Count; i++)
-			{
-				arr[i] = value;
+				new Chunk(.(simulationWidth,0,simulationWidth,simulationHeight))
+			);
+			for(int i=0; i<244; i++){
+				SetElement(i,5,Particles[0]);
 			}
 		}
 
 		public ~this()
 		{
-			delete (i);
-			delete (texture);
-			delete (c);
-			DeleteDictionaryAndValues!(chunks);
 		}
 
 		public void SetElement(int x, int y, Particle value)
 		{
-			rect chunk = chunks.FindChunkAtPoint(.(x * 4, y * 4));
+			chunks[0].SetElement(x,y,value);
+		}
 
-			Particle[,] particles = chunks[chunk];
-			if (!withinBounds(chunk, x, y))
-				return;
-
-			//Get row & column relative to the chunk position. This is done because if a chunks position isn't 0,0, we need to convert x and y to a position relative to the origin of that chunk
-			int chunkRow=x-(chunk.X*4);
-			int chunkColumn=y-(chunk.Y*4);
-
-			particles[chunkRow, chunkColumn] = value;
-			particles[chunkRow, chunkColumn].pos = .(chunkRow, chunkColumn);
-			particles[chunkRow, chunkColumn].timer = simulationClock + 1;
-			particles[chunkRow, chunkColumn].stable = false;
-
-			//Trying to set particles around the one we're setting to be not stable anymore. Causes access violation. I don't know why. Help.
-			for(int i=-3; i<1; i++){
-				for(int j=-3; j<1; j++){
-
-					if(withinBounds(chunk,x+i,y+j)){
-						chunkRow=x-(chunk.X*4);
-						chunkColumn=y-(chunk.Y*4);
-						if(particles[chunkRow+i,chunkColumn+i].id!=0){
-							particles[chunkRow+i,chunkColumn+i].stable=false;
-						}
-					}
+		public Chunk getChunkAtPosition(int x, int y){
+			Chunk c=default;
+			for(Chunk ch in chunks){
+				if(ch.chunkRect.Contains(.(x,y))){
+					c=ch;
+					break;
 				}
 			}
-			
-			i.SetPixels(.(x, y, 1, 1), scope Color[](value.particleColor));
+
+			return c;
 		}
+
+		public void chunksInView(rect Viewbounds,ref List<Chunk> outList){
+			for(Chunk c in chunks){
+				if(c.chunkRect.Intersects(Viewbounds)){
+					outList.Add(c);
+				}
+			}
+		}
+
 
 		static bool withinBounds(rect chunk, int x, int y)
 		{
-			return chunk.Contains(.(x + chunk.X, y + chunk.Y));
+			return false;
 		}
 
 		public Particle GetElement(int x, int y)
 		{
-			rect chunk = chunks.FindChunkAtPoint(.(x * 4, y * 4));
-			if (withinBounds(chunk, x, y)){
-				int chunkRow=x-chunk.X/4;
-				int chunkColumn=y-chunk.Y/4;
-				return chunks[chunk][chunkRow, chunkColumn];
-			}
-			else
-			{
-				return Particles[2];
-			}
+			return Particles[2];
 		}
 
 
@@ -174,19 +133,7 @@ namespace BeefSand
 		//Simulate a single frame
 		public void Simulate(float dT)
 		{
-			rect viewport = Core.Window.RenderBounds;
-			List<rect> chunkInView=new List<rect>();
-			chunks.FindChunksInView(viewport,ref chunkInView);
-			for(int i=0; i<chunkInView.Count; i++){
-				chunks.Update(chunkInView[i],ref simulationClock);
-			}
-
-			simulationClock += 1;
-			if (simulationClock > 254)
-			{
-				simulationClock = 0;
-			}
-			delete(chunkInView);
+			chunks[0].Simulate();
 		}
 		protected override void OnUpdate()
 		{
@@ -194,9 +141,7 @@ namespace BeefSand
 		}
 		public void Draw()
 		{
-			texture.SetData(i.Pixels);
-			Core.Draw.Image(texture, aabb2(0, 0, i.Width * 4, i.Height * 4), Color.White);
-			chunks.Draw();
+			chunks[0].Draw();
 		}
 	}
 }

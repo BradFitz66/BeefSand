@@ -3,40 +3,83 @@ using Atma;
 using System.Collections;
 namespace BeefSand.lib
 {
-	class Chunk : Dictionary<rect, Particle[,]>
+	//Chunk class. A chunk can be seen as it's own self-containend simulation (sort of).
+	class Chunk
 	{
+		public rect chunkRect { get; };
+		Particle[,] particles;
+		Image renderImage;
+		Texture renderTexture;
+		uint8 chunkTimer = 0;
+		public bool isInView => Core.Window.RenderBounds.Intersects(chunkRect);
 
-		public this(){
+
+		public this(rect r)
+		{
+			chunkRect = r;
+			particles = new Particle[chunkRect.Width, chunkRect.Height];
+			renderImage = new .(chunkRect.Width * simulationSize, chunkRect.Height * simulationSize);
+			renderTexture = new .(renderImage);
+			renderTexture.Filter = .Nearest;
 		}
 
-		public void Add(rect chunk){
-			if(!this.ContainsKey(chunk)){
-
-			}
-		}
-
-		public void GenerateTerrain(){
-		}
-
-		public void Update(rect chunk, ref uint8 simulationClock){
-			if(!this.ContainsKey(chunk))
-				return;
-			Particle[,] particles=this[chunk];
-			for (int i = 0; i < simulationWidth; i++)
+		public void Simulate()
+		{
+			for (int x = 0; x < chunkRect.Width; x++)
 			{
-				for (int j = 0; j < simulationHeight; j++)
+				for (int y = 0; y < chunkRect.Height; y++)
 				{
-					if (particles[i, j].id == 1 || particles[i, j].stable)
+					if (particles[x, y].id == 1 || particles[x, y].stable)
 						continue;
-					if (particles[i, j].timer - simulationClock != 1)
-						particles[i, j].update(ref particles[i, j], 0);
+					if (particles[x, y].timer - simulationClock != 1){
+						Console.WriteLine(particles[x,y].update)
+						particles[x, y].update(ref particles[x, y], 0);
+					}
 				}
 			}
-			simulationClock += 1;
-			if (simulationClock > 254)
+			chunkTimer++;
+			if (chunkTimer > 254)
 			{
-				simulationClock = 0;
+				chunkTimer = 0;
 			}
+		}
+
+		public Particle GetElement(int x, int y)
+		{
+			if (WithinBounds(x, y))
+			{
+				return particles[x, y];
+			}
+			else
+			{
+				return Particles[2];
+			}
+		}
+
+		public void SetElement(int x, int y, Particle p)
+		{
+			if (WithinBounds(x, y))
+			{
+				particles[x, y] = p;
+				particles[x, y].pos = .(x, y);
+				particles[x, y].timer = chunkTimer;
+				particles[x, y].stable = false;
+
+				renderImage.SetPixels(.(x, y, 1, 1), scope Color[](p.particleColor));
+			}
+		}
+
+
+		public bool WithinBounds(int x, int y)
+		{
+			return chunkRect.Contains(.(x, y));
+		}
+
+		public void Draw()
+		{
+			renderTexture.SetData(renderImage.Pixels);
+			//Scale image to world size
+			Core.Draw.Image(renderTexture, aabb2(0, 0, chunkRect.Width * 16, chunkRect.Height * 16));
 		}
 	}
 }
