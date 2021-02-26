@@ -21,10 +21,6 @@ namespace BeefSand.lib
 	class Chunks : Dictionary<Chunk, Particle[,]>
 	{
 
-		public Chunk this[rect ind]{
-		
-		}
-
 		public this(){
 		}
 
@@ -34,15 +30,7 @@ namespace BeefSand.lib
 			}
 		}
 
-		Chunk getChunk(rect r){
-			Chunk c=default;
-			for(Chunk b in this){
-				if(r.GetHashCode()==b.GetHashCode()){
-					c=b;
-				}
-			}
-			return c;
-		}
+
 
 		public bool ContainsKey(rect chunk){
 			for(Chunk c in this){
@@ -53,55 +41,17 @@ namespace BeefSand.lib
 			return false;
 		}
 
-		public void FindChunksInView(rect viewport,ref List<Chunk> outList){
-			outList=new List<Chunk>();
-			for(Chunk r in this){
-				if(r.chunkBounds.Intersects(viewport)){
-					outList.Add(r);
-				}
-			}
-		}
-
-		public rect FindChunkAtPoint(int2 point){
-			rect chunk=.(0,0,0,0);
-			
-			for(rect r in this.Keys){
-				if(r.Contains(point)){
-					chunk=r;
-					break;
-				}
-			}
-			return chunk;
-		}
-
 		public void GenerateTerrain(){
 		}
 
-		public void Update(rect chunk, ref uint8 simulationClock){
-			if(!this.ContainsKey(chunk))
-				return;
+		public void Update(Chunk chunk, ref uint8 simulationClock){
 			Particle[,] particles=this[chunk];
-			for (int i = 0; i < chunk.Width/simulationSize; i++)
-			{
-				/*for (int j = 0; j < chunk.Height/simulationSize; j++)
-				{
-					if (particles[i, j].id == 1 || particles[i, j].stable)
-						continue;
-					if (particles[i, j].timer - simulationClock != 1)
-						particles[i, j].update(ref particles[i, j], 0);
-				}*/
-			}
-			simulationClock += 1;
-			if (simulationClock > 254)
-			{
-				simulationClock = 0;
-			}
+
+			
 		}
 
 		public void Draw(){
-			for(rect r in this){
-				Core.Draw.HollowRect(r.ToAABB(),4,.(0,0,0,100));
-			}
+			
 		}
 	}
 }
