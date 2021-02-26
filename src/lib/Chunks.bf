@@ -3,11 +3,10 @@ using Atma;
 using System.Collections;
 namespace BeefSand.lib
 {
-	struct Chunk : IHashable
+	class Chunk
 	{
 		public rect chunkBounds;
 		public Image chunkRenderImage;
-		public uint8 chunkClock = 0;
 		public Texture chunkRenderTexture;
 		public this(rect r)
 		{
@@ -37,7 +36,11 @@ namespace BeefSand.lib
 		{
 			if (!this.ContainsKey(chunk))
 			{
-				Add(Chunk(chunk), new Particle[chunk.Width, chunk.Height]);
+				Particle[,] p=new Particle[chunk.Width, chunk.Height];
+				for(int i=0; i<p.Count; i++){
+					p[i]=Particles[1];
+				}
+				Add(new Chunk(chunk),p);
 			}
 		}
 
@@ -45,7 +48,12 @@ namespace BeefSand.lib
 		{
 			if (!this.ContainsKey(chunk))
 			{
-				Add(chunk, new Particle[chunk.chunkBounds.Width, chunk.chunkBounds.Height]);
+				Particle[,] p=new Particle[chunk.chunkBounds.Width, chunk.chunkBounds.Height];
+				for(int i=0; i<p.Count; i++){
+					p[i]=Particles[1];
+				}
+
+				Add(chunk, p);
 			}
 		}
 
@@ -54,7 +62,7 @@ namespace BeefSand.lib
 
 		public bool ContainsKey(rect chunk)
 		{
-			for (Chunk c in this)
+			for (Chunk c in this.Keys)
 			{
 				if (c.GetHashCode() == chunk.GetHashCode())
 				{
@@ -68,17 +76,28 @@ namespace BeefSand.lib
 		{
 		}
 
-		public void Update(Chunk chunk, ref uint8 simulationClock)
-		{
+		public void SimulateChunk(Chunk chunk){
 			Particle[,] particles = this[chunk];
 			for (int x = 0; x < chunk.chunkBounds.Width; x++)
 			{
 				for (int y = 0; y < chunk.chunkBounds.Height; y++)
 				{
-					if (particles[x, y].id == 1 || particles[x, y].stable || particles[x, y].timer - chunk.chunkClock == 1)
+
+					if (particles[x, y].id == 1 || particles[x, y].stable || particles[x, y].timer - simulationClock == 1 || particles[x,y].update==null){
 						continue;
+					}
 
 					particles[x, y].update(ref particles[x, y], 0);
+				}
+			}
+		}
+
+		public void Update()
+		{
+			for(Chunk c in this.Keys){
+
+				if(simulationBounds.Inflate(simulationWidth/2).Intersects(c.chunkBounds)){
+					SimulateChunk(c);
 				}
 			}
 		}
@@ -86,10 +105,9 @@ namespace BeefSand.lib
 		public void Draw()
 		{
 
-			for(Chunk c in this){
+			for(Chunk c in this.Keys){
 
 				if(simulationBounds.Intersects(c.chunkBounds)){
-					Console.WriteLine(c.chunkBounds);
 					c.Draw();
 				}
 			}
@@ -98,7 +116,7 @@ namespace BeefSand.lib
 		public Chunk FindChunkAtPoint(int2 pos)
 		{
 			Chunk chunk = default;
-			for (Chunk c in this)
+			for (Chunk c in this.Keys)
 			{
 				if (c.chunkBounds.Contains(pos))
 				{

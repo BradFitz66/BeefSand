@@ -40,7 +40,7 @@ namespace BeefSand
 		public static void Sand(ref Particle p, float dT=0)
 		{
 
-			/*int randNumber = r.Next(1,10);
+			int randNumber = r.Next(1,10);
 			int xMovement=randNumber > 5 ? -1 : 1;
 
 			Particle below = sim.GetElement((int32)p.pos.x, (int32)p.pos.y + 1);
@@ -79,7 +79,7 @@ namespace BeefSand
 				return;
 			}
 			
-			sim.SetElement((int32)p.pos.x, (int32)p.pos.y, replacing);*/
+			sim.SetElement((int32)p.pos.x, (int32)p.pos.y, replacing);
 		}
 
 		public static void Air(ref Particle p, float dT=0) { }

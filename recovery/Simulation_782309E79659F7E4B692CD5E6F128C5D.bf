@@ -73,12 +73,11 @@ namespace BeefSand
 		public Chunks chunks;
 		public Color[] c;
 
-
 		public this()
 		{
 			simulationBounds=.(Core.Window.RenderBounds.X,Core.Window.RenderBounds.Y,Core.Window.RenderBounds.Width/simulationSize,Core.Window.RenderBounds.Height/simulationSize);
 			chunks = new Chunks();
-			Chunk testChunk1 = Chunk(.(0, 0, simulationWidth, simulationHeight));
+			Chunk testChunk1 = new Chunk(.(0, 0, simulationWidth, simulationHeight));
 			Chunk testChunk2 = Chunk(.(simulationWidth, 0, simulationWidth, simulationHeight));
 			chunks.Add(
 				testChunk1
@@ -141,6 +140,7 @@ namespace BeefSand
 		//Simulate a single frame^
 		public void Simulate(float dT)
 		{
+			chunks.Update();
 		}
 		protected override void OnUpdate()
 		{
