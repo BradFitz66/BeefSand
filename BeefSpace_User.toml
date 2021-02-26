@@ -1,7 +1,7 @@
 FileVersion = 1
 LastConfig = "Release"
 LastPlatform = "Win64"
-RecentFilesList = ["src\\lib\\Simulation.bf", "src\\GameApp.bf", "c:\\Program Files\\BeefLang\\BeefLibs\\Atma.Framework\\src\\Atma.Common\\src\\Graphics\\Images\\Image.bf", "src\\Particles.bf", "src\\lib\\Chunks.bf", "c:\\Program Files\\BeefLang\\BeefLibs\\corlib\\src\\System.bf", "c:\\Program Files\\BeefLang\\BeefLibs\\corlib\\src\\Collections\\Dictionary.bf", "Disassembly", "c:\\Program Files\\BeefLang\\BeefLibs\\corlib\\src\\IO\\FileStream.bf", "src\\Program.bf", "c:\\Program Files\\BeefLang\\BeefLibs\\SDL2\\src\\SDLApp.bf", "Disassembly", "build\\Debug_Win64\\BeefSand\\minkernel\\crts\\ucrt\\src\\appcrt\\internal\\report_runtime_error.cpp", "Disassembly", "Disassembly"]
+RecentFilesList = ["src\\lib\\Simulation.bf", "c:\\Program Files\\BeefLang\\BeefLibs\\corlib\\src\\Collections\\Dictionary.bf", "src\\Particles.bf", "c:\\Program Files\\BeefLang\\BeefLibs\\corlib\\src\\IO\\FileStream.bf", "c:\\Program Files\\BeefLang\\BeefLibs\\corlib\\src\\System.bf", "src\\lib\\Chunks.bf", "src\\GameApp.bf", "c:\\Program Files\\BeefLang\\BeefLibs\\Atma.Framework\\src\\Atma.Common\\src\\Graphics\\Images\\Image.bf", "Disassembly", "src\\Program.bf", "c:\\Program Files\\BeefLang\\BeefLibs\\SDL2\\src\\SDLApp.bf", "Disassembly", "build\\Debug_Win64\\BeefSand\\minkernel\\crts\\ucrt\\src\\appcrt\\internal\\report_runtime_error.cpp", "Disassembly", "Disassembly"]
 
 [MainWindow]
 X = 64
@@ -22,7 +22,7 @@ Type = "DockingFrame"
 SplitType = 1
 
 [[MainDockingFrame.DockedWidgets.DockedWidgets]]
-RequestedWidth = 452.2
+RequestedWidth = 503.0
 RequestedHeight = 200.0
 Type = "TabbedView"
 
@@ -36,18 +36,44 @@ Type = "ProjectPanel"
 IsFillWidget = true
 Permanent = true
 RequestedWidth = 1653.0
-RequestedHeight = 150.0
-SizePriority = 733.0
+RequestedHeight = 401.8
+SizePriority = 401.8
 DefaultDocumentsTabbedView = true
 Type = "TabbedView"
 
 [[MainDockingFrame.DockedWidgets.DockedWidgets.Tabs]]
 TabLabel = "FileStream.bf"
-TabWidth = 115.0
+TabWidth = 105.0
 Type = "SourceViewPanel"
 FilePath = "c:\\Program Files\\BeefLang\\BeefLibs\\corlib\\src\\IO\\FileStream.bf"
 CursorPos = 1842
 VertPos = 675.0
+ProjectName = "corlib"
+
+[[MainDockingFrame.DockedWidgets.DockedWidgets.Tabs]]
+TabLabel = "Particles.bf"
+TabWidth = 93.0
+Type = "SourceViewPanel"
+FilePath = "src\\Particles.bf"
+CursorPos = 3048
+VertPos = 900.0
+ProjectName = "BeefSand"
+
+[[MainDockingFrame.DockedWidgets.DockedWidgets.Tabs]]
+TabLabel = "Chunks.bf"
+TabWidth = 86.0
+Type = "SourceViewPanel"
+FilePath = "src\\lib\\Chunks.bf"
+CursorPos = 640
+ProjectName = "BeefSand"
+
+[[MainDockingFrame.DockedWidgets.DockedWidgets.Tabs]]
+TabLabel = "System.bf"
+TabWidth = 86.0
+Type = "SourceViewPanel"
+FilePath = "c:\\Program Files\\BeefLang\\BeefLibs\\corlib\\src\\System.bf"
+CursorPos = 2583
+VertPos = 1905.0
 ProjectName = "corlib"
 
 [[MainDockingFrame.DockedWidgets.DockedWidgets.Tabs]]
@@ -60,40 +86,13 @@ VertPos = 1770.0
 ProjectName = "corlib"
 
 [[MainDockingFrame.DockedWidgets.DockedWidgets.Tabs]]
-TabLabel = "Particles.bf"
-TabWidth = 93.0
-Type = "SourceViewPanel"
-FilePath = "src\\Particles.bf"
-CursorPos = 3048
-VertPos = 1395.0
-ProjectName = "BeefSand"
-
-[[MainDockingFrame.DockedWidgets.DockedWidgets.Tabs]]
-TabLabel = "Chunks.bf"
-TabWidth = 86.0
-Type = "SourceViewPanel"
-FilePath = "src\\lib\\Chunks.bf"
-CursorPos = 1087
-VertPos = 540.0
-ProjectName = "BeefSand"
-
-[[MainDockingFrame.DockedWidgets.DockedWidgets.Tabs]]
-TabLabel = "System.bf"
-TabWidth = 86.0
-Type = "SourceViewPanel"
-FilePath = "c:\\Program Files\\BeefLang\\BeefLibs\\corlib\\src\\System.bf"
-CursorPos = 2583
-VertPos = 2595.0
-ProjectName = "corlib"
-
-[[MainDockingFrame.DockedWidgets.DockedWidgets.Tabs]]
 Active = true
 TabLabel = "Simulation.bf"
 TabWidth = 105.0
 Type = "SourceViewPanel"
 FilePath = "src\\lib\\Simulation.bf"
-CursorPos = 3251
-VertPos = 1800.0
+CursorPos = 1679
+VertPos = 964.0
 ProjectName = "BeefSand"
 
 [[MainDockingFrame.DockedWidgets.DockedWidgets.Tabs]]
@@ -102,7 +101,7 @@ TabWidth = 81.0
 Type = "SourceViewPanel"
 FilePath = "c:\\Program Files\\BeefLang\\BeefLibs\\Atma.Framework\\src\\Atma.Common\\src\\Graphics\\Images\\Image.bf"
 CursorPos = 1466
-VertPos = 780.0
+VertPos = 714.0
 ProjectName = "Atma.Common"
 
 [[MainDockingFrame.DockedWidgets.DockedWidgets.Tabs]]
@@ -110,13 +109,13 @@ TabLabel = "GameApp.bf"
 TabWidth = 103.0
 Type = "SourceViewPanel"
 FilePath = "src\\GameApp.bf"
-CursorPos = 2080
-VertPos = 900.0
+CursorPos = 706
+VertPos = 225.0
 ProjectName = "BeefSand"
 
 [[MainDockingFrame.DockedWidgets.DockedWidgets.Tabs]]
 TabLabel = "Disassembly"
-TabWidth = 102.0
+TabWidth = 122.0
 Type = "DisassemblyPanel"
 
 [[MainDockingFrame.DockedWidgets.DockedWidgets.Tabs]]
@@ -125,7 +124,6 @@ TabWidth = 96.0
 Type = "SourceViewPanel"
 FilePath = "src\\Program.bf"
 CursorPos = 844
-VertPos = 540.0
 ProjectName = "BeefSand"
 
 [[MainDockingFrame.DockedWidgets]]

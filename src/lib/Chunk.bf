@@ -32,7 +32,7 @@ namespace BeefSand.lib
 					if (particles[x, y].id == 1 || particles[x, y].stable)
 						continue;
 					if (particles[x, y].timer - simulationClock != 1){
-						Console.WriteLine(particles[x,y].update)
+						Console.WriteLine(particles[x,y].update);
 						particles[x, y].update(ref particles[x, y], 0);
 					}
 				}
