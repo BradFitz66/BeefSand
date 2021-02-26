@@ -1,7 +1,6 @@
 using System;
 using System.Collections;
 using System.Diagnostics;
-using ImGui;
 
 using SDL2;
 namespace BeefSand

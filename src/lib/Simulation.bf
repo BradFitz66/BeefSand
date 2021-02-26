@@ -15,10 +15,12 @@ namespace BeefSand
 		public Color particleColor;
 		Color cTemp = Color.White;
 		public Vector2 pos;
+
 		public uint8 timer;
 		public uint8 density;
 		public uint8 velocity;
 		public uint8 maxVelocity;
+
 		public float sleepTimer = 0;
 		public ParticleUpdate update;
 		bool _stable = false;
@@ -27,7 +29,7 @@ namespace BeefSand
 			get { return _stable; } set mut
 			{
 				sleepTimer = 0;
-				//_stable = value;
+				_stable = value;
 			}
 		};
 		public Simulation sim;
@@ -76,15 +78,18 @@ namespace BeefSand
 		public this()
 		{
 			simulationBounds=.(Core.Window.RenderBounds.X,Core.Window.RenderBounds.Y,Core.Window.RenderBounds.Width/simulationSize,Core.Window.RenderBounds.Height/simulationSize);
+
 			chunks = new Chunks();
-			Chunk testChunk1 = new Chunk(.(0, 0, simulationWidth, simulationHeight));
-			Chunk testChunk2 = new Chunk(.(simulationWidth, 0, simulationWidth, simulationHeight));
+			rect testChunk1 = (.(0, 0, simulationWidth, simulationHeight));
+			rect testChunk2 = (.(simulationWidth, 0, simulationWidth, simulationHeight));
+
 			chunks.Add(
 				testChunk1
 			);
 			chunks.Add(
 				testChunk2
 			);
+
 			chunks.GenerateTerrain();
 		}
 
@@ -93,27 +98,33 @@ namespace BeefSand
 			delete (i);
 			delete (texture);
 			delete (c);
-			DeleteDictionaryAndValues!(chunks);
 		}
 
 		public void SetElement(int x, int y, Particle value)
 		{
-			Chunk chunk = chunks.FindChunkAtPoint(.(x, y));
-			if (!withinBounds(chunk.chunkBounds, x, y) || (chunk.chunkBounds.Width==0 && chunk.chunkBounds.Height==0))
+			rect chunkBounds = chunks.FindChunkAtPoint(.(x, y));
+			Chunk chunk = chunks.GetChunkFromBounds(chunkBounds);
+			if (!withinBounds(chunkBounds, x, y) || (chunkBounds.Width==0 && chunkBounds.Height==0))
 				return;	
-			Particle[,] particles = chunks[chunk];
+			Particle[,] particles = chunk.particles;
 
-			rect bounds=chunk.chunkBounds;
+			rect bounds=chunkBounds;
 			int chunkX=x-bounds.X;
 			int chunkY=y-bounds.Y;
 
-			if(chunkX>particles.GetLength(0)-1 || chunkY>particles.GetLength(1)-1)
-				return;
-
+			/*if(chunkX>particles.GetLength(0)-1 || chunkY>particles.GetLength(1)-1)
+				return;*/
+			for(int i=-3; i<3; i++){
+				for(int j=-3; j<3; j++){
+					if(chunkX+i>particles.GetLength(0)-1 || chunkY+i > particles.GetLength(0) || chunkX+i<0 || chunkY+i<0)
+						continue;
+					particles[chunkX+i,chunkY+j].stable=false;
+				}
+			}
 
 			particles[chunkX,chunkY] = value;
-			particles[chunkX,chunkY].pos = .(chunkX, chunkY);
-			particles[chunkX,chunkY].timer = simulationClock + 1;
+			particles[chunkX,chunkY].pos = .(x, y);
+			particles[chunkX,chunkY].timer = chunk.clock + 1;
 			particles[chunkX,chunkY].stable = false;
 			chunk.chunkRenderImage.SetPixels(.(chunkX, chunkY, 1, 1), scope Color[](value.particleColor));
 		}
@@ -125,9 +136,10 @@ namespace BeefSand
 
 		public Particle GetElement(int x, int y)
 		{
-			Chunk chunk = chunks.FindChunkAtPoint(.(x, y));
-			if (withinBounds(chunk.chunkBounds, x, y)){
-				return chunks[chunk][x, y];
+			rect chunkBounds = chunks.FindChunkAtPoint(.(x, y));
+			Chunk chunk = chunks.GetChunkFromBounds(chunkBounds);
+			if (withinBounds(chunkBounds, x, y)){
+				return chunk.particles[x-chunkBounds.X, y-chunkBounds.Y];
 			}
 			else
 			{

@@ -5,126 +5,105 @@ namespace BeefSand.lib
 {
 	class Chunk
 	{
-		public rect chunkBounds;
-		public Image chunkRenderImage;
-		public Texture chunkRenderTexture;
+		public Image chunkRenderImage ~ delete _;
+		public Particle[,] particles ~ delete _;
+		public Texture chunkRenderTexture ~ delete _;
+		public uint8 clock=0;
 		public this(rect r)
 		{
-			chunkBounds = r;
-			chunkRenderImage = new Image(r.Width, r.Height, Color.White);
+			
+			chunkRenderImage = new Image(r.Width, r.Height, Color.Transparent);
 			chunkRenderTexture = new .(chunkRenderImage);
-			chunkRenderTexture.Filter=.Nearest;
+			chunkRenderTexture.Filter = .Nearest;
+			particles = new Particle[chunkRenderImage.Width,chunkRenderImage.Height];
 		}
-		public int GetHashCode()
-		{
-			return chunkBounds.GetHashCode();
+
+		public void Update(rect chunkBounds){
+			for (int x = 0; x < chunkBounds.Width; x++)
+			{
+				for (int y = 0; y < chunkBounds.Height; y++)
+				{
+					Particle p = particles[x,y];
+					if (p.id== 1 || p.stable || p.timer - clock == 1 || p.update == null)
+					{
+						continue;
+					}
+					p.update(ref p, 0);
+				}
+			}
+			clock+=1;
 		}
-		public void Draw(){
+		public void Draw(rect chunkBounds){
 			chunkRenderTexture.SetData(chunkRenderImage.Pixels);
-			aabb2 a= rect(chunkBounds.X*4,chunkBounds.Y*4,chunkBounds.Width*4,chunkBounds.Height*4).ToAABB();
+			aabb2 a = rect(chunkBounds.X * 4, chunkBounds.Y * 4, chunkBounds.Width * 4, chunkBounds.Height * 4).ToAABB();
 			Core.Draw.Image(chunkRenderTexture, a, Color.White);
 		}
 	}
 
-	class Chunks : Dictionary<Chunk, Particle[,]>
+	class Chunks
 	{
+		Dictionary<rect, Chunk> chunkStorage = new Dictionary<rect, Chunk>() ~ DeleteDictionaryAndValues!(_);
 		public this()
 		{
-		}
-
-		public void Add(rect chunk)
-		{
-			if (!this.ContainsKey(chunk))
-			{
-				Particle[,] p=new Particle[chunk.Width, chunk.Height];
-				for(int i=0; i<p.Count; i++){
-					p[i]=Particles[1];
-				}
-				Add(new Chunk(chunk),p);
-			}
-		}
-
-		public void Add(Chunk chunk)
-		{
-			if (!this.ContainsKey(chunk))
-			{
-				Particle[,] p=new Particle[chunk.chunkBounds.Width, chunk.chunkBounds.Height];
-				for(int i=0; i<p.Count; i++){
-					p[i]=Particles[1];
-				}
-
-				Add(chunk, p);
-			}
-		}
-
-
-
-
-		public bool ContainsKey(rect chunk)
-		{
-			for (Chunk c in this.Keys)
-			{
-				if (c.GetHashCode() == chunk.GetHashCode())
-				{
-					return true;
-				}
-			}
-			return false;
 		}
 
 		public void GenerateTerrain()
 		{
 		}
 
-		public void SimulateChunk(Chunk chunk){
-			Particle[,] particles = this[chunk];
-			for (int x = 0; x < chunk.chunkBounds.Width; x++)
+		
+		public void Add(rect chunkBounds){
+			if(!chunkStorage.ContainsKey(chunkBounds))
+				chunkStorage.Add(chunkBounds,new Chunk(chunkBounds));
+		}
+
+		public Chunk GetChunkFromBounds(rect bounds){
+			Chunk c=default;
+			if(chunkStorage.ContainsKey(bounds)){
+			   c=chunkStorage[bounds];
+			}
+
+			return c;
+		}
+
+		public rect FindChunkAtPoint(int2 pos)
+		{
+			rect chunkBounds = default;
+			for (rect c in chunkStorage.Keys)
 			{
-				for (int y = 0; y < chunk.chunkBounds.Height; y++)
+				if (c.Contains(pos))
 				{
-
-					if (particles[x, y].id == 1 || particles[x, y].stable || particles[x, y].timer - simulationClock == 1 || particles[x,y].update==null){
-						continue;
-					}
-
-					particles[x, y].update(ref particles[x, y], 0);
+					chunkBounds = c;
+					break;
 				}
 			}
+			return chunkBounds;
 		}
+
+		
 
 		public void Update()
 		{
-			for(Chunk c in this.Keys){
-
-				if(simulationBounds.Inflate(simulationWidth/2).Intersects(c.chunkBounds)){
-					SimulateChunk(c);
+			for (rect c in chunkStorage.Keys)
+			{
+				if (simulationBounds.Intersects(c))
+				{
+					chunkStorage[c].Update(c);
 				}
 			}
 		}
 
 		public void Draw()
 		{
-
-			for(Chunk c in this.Keys){
-
-				if(simulationBounds.Intersects(c.chunkBounds)){
-					c.Draw();
-				}
-			}
-		}
-
-		public Chunk FindChunkAtPoint(int2 pos)
-		{
-			Chunk chunk = default;
-			for (Chunk c in this.Keys)
+			for (rect r in chunkStorage.Keys)
 			{
-				if (c.chunkBounds.Contains(pos))
+				if (simulationBounds.Intersects(r))
 				{
-					chunk = c;
-					break;
+					Chunk c = chunkStorage[r];
+					c.Draw(r);
 				}
 			}
-			return chunk;
 		}
+
 	}
 }
