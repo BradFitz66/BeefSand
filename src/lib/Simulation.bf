@@ -79,16 +79,10 @@ namespace BeefSand
 		{
 			simulationBounds=.(Core.Window.RenderBounds.X,Core.Window.RenderBounds.Y,Core.Window.RenderBounds.Width/simulationSize,Core.Window.RenderBounds.Height/simulationSize);
 
-			chunks = new Chunks();
-			rect testChunk1 = (.(0, 0, simulationWidth, simulationHeight));
-			rect testChunk2 = (.(simulationWidth, 0, simulationWidth, simulationHeight));
+			chunks = new Chunks(2,1);
+			
 
-			chunks.Add(
-				testChunk1
-			);
-			chunks.Add(
-				testChunk2
-			);
+			Console.WriteLine(chunks.FindChunkAtPoint(.(0,250)).particles);
 
 			chunks.GenerateTerrain();
 		}
@@ -100,23 +94,26 @@ namespace BeefSand
 			delete (c);
 		}
 
+
 		public void SetElement(int x, int y, Particle value)
 		{
-			rect chunkBounds = chunks.FindChunkAtPoint(.(x, y));
-			Chunk chunk = chunks.GetChunkFromBounds(chunkBounds);
-			if (!withinBounds(chunkBounds, x, y) || (chunkBounds.Width==0 && chunkBounds.Height==0))
-				return;	
+			Chunk chunk = chunks.FindChunkAtPoint(.(x,y));
+
+			rect chunkBounds=.(x-x%simulationWidth,y-y%simulationHeight,simulationWidth,simulationHeight);
+			if (!withinBounds(chunkBounds, x, y) || (chunkBounds.Width==0 && chunkBounds.Height==0) || chunk==null)
+				return;
+
+			Console.WriteLine(chunk.chunkIndex);
+
 			Particle[,] particles = chunk.particles;
 
 			rect bounds=chunkBounds;
 			int chunkX=x-bounds.X;
 			int chunkY=y-bounds.Y;
 
-			/*if(chunkX>particles.GetLength(0)-1 || chunkY>particles.GetLength(1)-1)
-				return;*/
 			for(int i=-3; i<3; i++){
 				for(int j=-3; j<3; j++){
-					if(chunkX+i>particles.GetLength(0)-1 || chunkY+i > particles.GetLength(0) || chunkX+i<0 || chunkY+i<0)
+					if(chunkX+i>simulationWidth-1 || chunkY+j > simulationHeight-1 || chunkX+i<0 || chunkY+j<0)
 						continue;
 					particles[chunkX+i,chunkY+j].stable=false;
 				}
@@ -134,17 +131,17 @@ namespace BeefSand
 			return chunk.Contains(.(x, y));
 		}
 
+
 		public Particle GetElement(int x, int y)
 		{
-			rect chunkBounds = chunks.FindChunkAtPoint(.(x, y));
+			rect chunkBounds = .(x-x%simulationWidth,y-y%simulationHeight,simulationWidth,simulationHeight);
 			Chunk chunk = chunks.GetChunkFromBounds(chunkBounds);
-			if (withinBounds(chunkBounds, x, y)){
-				return chunk.particles[x-chunkBounds.X, y-chunkBounds.Y];
-			}
-			else
-			{
-				return Particles[2];
-			}
+			if (!withinBounds(chunkBounds, x, y) || x<0 || y<0 || (chunkBounds.Width==0 && chunkBounds.Height==0) || chunk==null)
+				return Particles[2];	
+
+
+
+			return chunk.particles[x-chunkBounds.X, y-chunkBounds.Y];
 		}
 
 

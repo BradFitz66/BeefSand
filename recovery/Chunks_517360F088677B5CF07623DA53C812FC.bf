@@ -5,110 +5,109 @@ namespace BeefSand.lib
 {
 	class Chunk
 	{
+		public int2 chunkIndex;
 		public Image chunkRenderImage ~ delete _;
-		public Particle[,] particles ~ delete _;
+		public Particle[,] particles=new Particle[,] ~ delete _;
 		public Texture chunkRenderTexture ~ delete _;
-		public uint8 clock=0;
-		public this(rect r)
+		public uint8 clock = 0;
+		public this(int2 index)
 		{
-			
-			chunkRenderImage = new Image(r.Width, r.Height, Color.Transparent);
+			chunkIndex = index;
+			chunkRenderImage = new Image(simulationWidth, simulationHeight, Color.Transparent);
 			chunkRenderTexture = new .(chunkRenderImage);
 			chunkRenderTexture.Filter = .Nearest;
-			particles = new Particle[chunkRenderImage.Width,chunkRenderImage.Height];
+			particles = new Particle[chunkRenderImage.Width, chunkRenderImage.Height];
 		}
 
-		public void Update(rect chunkBounds){
-			for (int x = 0; x < chunkBounds.Width; x++)
+		public void Update()
+		{
+
+
+			for (int x = 0; x < simulationWidth; x++)
 			{
-				for (int y = 0; y < chunkBounds.Height; y++)
+				for (int y = 0; y < simulationHeight-1; y++)
 				{
-
-
-					if(x>particles.GetLength(0)-1 || chunkY>particles.GetLength(1)-1)
-						return;
-					Particle p = particles[x,y];
-					if (p.id== 1 || p.stable || p.timer - clock == 1 || p.update == null)
+					Particle p = particles[x, y];
+					if (p.id == 1 || p.stable || p.timer - clock == 1 || p.update == null)
 					{
 						continue;
 					}
-					
 					p.update(ref p, 0);
 				}
 			}
-			clock+=1;
+			clock += 1;
 		}
-		public void Draw(rect chunkBounds){
+		public void Draw()
+		{
 			chunkRenderTexture.SetData(chunkRenderImage.Pixels);
-			aabb2 a = rect(chunkBounds.X * 4, chunkBounds.Y * 4, chunkBounds.Width * 4, chunkBounds.Height * 4).ToAABB();
+			aabb2 a = rect((chunkIndex.x * simulationWidth) * 4, (chunkIndex.y * simulationHeight) * 4, simulationWidth * 4, simulationHeight * 4).ToAABB();
 			Core.Draw.Image(chunkRenderTexture, a, Color.White);
 		}
 	}
 
 	class Chunks
 	{
-		Dictionary<rect, Chunk> chunkStorage = new Dictionary<rect, Chunk>() ~ DeleteDictionaryAndValues!(_);
-		public this()
+		Chunk[,] chunkStorage;
+		int xChunks=0;
+		int yChunks=0;
+
+		public this(int ChunkAmountX, int ChunkAmountY)
 		{
+			chunkStorage = new Chunk[ChunkAmountX, ChunkAmountY];
+			for (int x = 0; x < ChunkAmountX; x++)
+			{
+				for (int y = 0; y < ChunkAmountY; y++)
+				{
+					chunkStorage[x, y] = new Chunk(.(x, y));
+				}
+			}
+			xChunks=ChunkAmountX;
+			yChunks=ChunkAmountY;
 		}
 
 		public void GenerateTerrain()
 		{
 		}
 
-		
-		public void Add(rect chunkBounds){
-			if(!chunkStorage.ContainsKey(chunkBounds))
-				chunkStorage.Add(chunkBounds,new Chunk(chunkBounds));
-		}
-
-		public Chunk GetChunkFromBounds(rect bounds){
-			Chunk c=default;
-			if(chunkStorage.ContainsKey(bounds)){
-			   c=chunkStorage[bounds];
-			}
-
-			return c;
-		}
-
-		public rect FindChunkAtPoint(int2 pos)
+		[Inline]
+		public Chunk GetChunkFromBounds(rect bounds)
 		{
-			rect chunkBounds = default;
-			for (rect c in chunkStorage.Keys)
-			{
-				if (c.Contains(pos))
-				{
-					chunkBounds = c;
-					break;
-				}
-			}
-			return chunkBounds;
+			return (chunkStorage[bounds.X / simulationWidth, bounds.Y / simulationHeight]);
 		}
 
-		
+		[Inline]
+		public Chunk FindChunkAtPoint(int2 pos)
+		{
+			int2 roundedPos = .(
+				pos.x - pos.x % simulationWidth,
+				pos.y - pos.y % simulationHeight
+				);
+			return chunkStorage[roundedPos.x / simulationWidth, roundedPos.y / simulationHeight];
+		}
+
+
 
 		public void Update()
-		{
-			for (rect c in chunkStorage.Keys)
+		{for (int x = 0; x < xChunks; x++)
 			{
-				if (simulationBounds.Intersects(c))
+				for (int y = 0; y < yChunks; y++)
 				{
-					chunkStorage[c].Update(c);
+
+					chunkStorage[x,y].Update();
 				}
 			}
 		}
 
 		public void Draw()
 		{
-			for (rect r in chunkStorage.Keys)
+			for (int x = 0; x < xChunks; x++)
 			{
-				if (simulationBounds.Intersects(r))
+				for (int y = 0; y < yChunks; y++)
 				{
-					Chunk c = chunkStorage[r];
-					c.Draw(r);
+
+					chunkStorage[x,y].Draw();
 				}
 			}
 		}
-
 	}
 }
