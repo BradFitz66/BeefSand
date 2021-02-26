@@ -20,7 +20,6 @@ namespace BeefSand
 		int32 mY;
 		int32 brushRadius = 100;
 		int selectedParticle=0;
-		Chunks c;
 		bool isRunning = true;
 		Stopwatch t;
 		TimeSpan keypress;
