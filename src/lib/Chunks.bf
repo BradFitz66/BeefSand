@@ -12,7 +12,7 @@ namespace BeefSand.lib
 		public this(rect r)
 		{
 			chunkBounds = r;
-			chunkRenderImage = new Image(r.Width, r.Height, Color.Transparent);
+			chunkRenderImage = new Image(r.Width, r.Height, Color.White);
 			chunkRenderTexture = new .(chunkRenderImage);
 			chunkRenderTexture.Filter=.Nearest;
 		}
@@ -22,7 +22,7 @@ namespace BeefSand.lib
 		}
 		public void Draw(){
 			chunkRenderTexture.SetData(chunkRenderImage.Pixels);
-			aabb2 a= rect(chunkBounds.X,chunkBounds.Y,chunkBounds.Width*4,chunkBounds.Height*4).ToAABB();
+			aabb2 a= rect(chunkBounds.X*4,chunkBounds.Y*4,chunkBounds.Width*4,chunkBounds.Height*4).ToAABB();
 			Core.Draw.Image(chunkRenderTexture, a, Color.White);
 		}
 	}
@@ -85,8 +85,13 @@ namespace BeefSand.lib
 
 		public void Draw()
 		{
+
 			for(Chunk c in this){
-				c.Draw();
+
+				if(simulationBounds.Intersects(c.chunkBounds)){
+					Console.WriteLine(c.chunkBounds);
+					c.Draw();
+				}
 			}
 		}
 

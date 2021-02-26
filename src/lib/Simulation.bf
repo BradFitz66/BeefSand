@@ -62,6 +62,7 @@ namespace BeefSand
 		public const int simulationHeight = 976 / simulationSize;
 		public static uint8 simulationClock;
 		public static float gravity = 9.81f;
+		public static rect simulationBounds;
 	}
 
 	class Simulation : Entity
@@ -75,7 +76,7 @@ namespace BeefSand
 
 		public this()
 		{
-			sim = this;
+			simulationBounds=.(Core.Window.RenderBounds.X,Core.Window.RenderBounds.Y,Core.Window.RenderBounds.Width/simulationSize,Core.Window.RenderBounds.Height/simulationSize);
 			chunks = new Chunks();
 			Chunk testChunk1 = Chunk(.(0, 0, simulationWidth, simulationHeight));
 			Chunk testChunk2 = Chunk(.(simulationWidth, 0, simulationWidth, simulationHeight));
@@ -83,10 +84,8 @@ namespace BeefSand
 				testChunk1
 			);
 			chunks.Add(
-			testChunk2
+				testChunk2
 			);
-			Chunk chunk = chunks.FindChunkAtPoint(.(245, 0));
-			Console.WriteLine(testChunk2.chunkBounds.Width);
 			chunks.GenerateTerrain();
 		}
 
@@ -101,23 +100,27 @@ namespace BeefSand
 		public void SetElement(int x, int y, Particle value)
 		{
 			Chunk chunk = chunks.FindChunkAtPoint(.(x, y));
-
-			
 			if (!withinBounds(chunk.chunkBounds, x, y) || (chunk.chunkBounds.Width==0 && chunk.chunkBounds.Height==0))
-				return;
+				return;	
 			Particle[,] particles = chunks[chunk];
-	
-			particles[x/4, y/4] = value;
-			particles[x/4, y/4].pos = .(x/4, y/4);
-			particles[x/4, y/4].timer = simulationClock + 1;
-			particles[x/4, y/4].stable = false;
-			
-			chunk.chunkRenderImage.SetPixels(.(x, y, 1, 1), scope Color[](value.particleColor));
+
+			rect bounds=chunk.chunkBounds;
+			int chunkX=x-bounds.X;
+			int chunkY=y-bounds.Y;
+
+			if(chunkX>particles.GetLength(0)-1 || chunkY>particles.GetLength(1)-1)
+				return;
+
+
+			particles[chunkX,chunkY] = value;
+			particles[chunkX,chunkY].pos = .(chunkX, chunkY);
+			particles[chunkX,chunkY].timer = simulationClock + 1;
+			particles[chunkX,chunkY].stable = false;
+			chunk.chunkRenderImage.SetPixels(.(chunkX, chunkY, 1, 1), scope Color[](value.particleColor));
 		}
 
 		static bool withinBounds(rect chunk, int x, int y)
 		{
-			
 			return chunk.Contains(.(x, y));
 		}
 
@@ -138,17 +141,10 @@ namespace BeefSand
 		//Simulate a single frame^
 		public void Simulate(float dT)
 		{
-			
-
-			/*simulationClock += 1;
-			if (simulationClock > 254)
-			{
-				simulationClock = 0;
-			}
-			delete(chunkInView);*/
 		}
 		protected override void OnUpdate()
 		{
+			simulationBounds=.(Core.Window.RenderBounds.X,Core.Window.RenderBounds.Y,Core.Window.RenderBounds.Width/simulationSize,Core.Window.RenderBounds.Height/simulationSize);
 			Simulate(0);
 		}
 		public void Draw()
