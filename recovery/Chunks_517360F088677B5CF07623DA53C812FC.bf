@@ -3,22 +3,60 @@ using Atma;
 using System.Collections;
 namespace BeefSand.lib
 {
-	class Chunks : Dictionary<rect, Particle[,]>
+	struct Chunk : IHashable{
+		public rect chunkBounds;
+		public Image chunkRenderImage;
+		public Texture chunkRenderTexture;
+		public this(rect r){
+			chunkBounds=r;
+			chunkRenderImage=new Image(r.Width,r.Height,Color.White);
+			chunkRenderTexture=new .(chunkRenderImage);
+		}
+		public int GetHashCode()
+		{
+			return chunkBounds.GetHashCode();
+		}
+	}
+
+	class Chunks : Dictionary<Chunk, Particle[,]>
 	{
+
+		public Chunk this[rect ind]{
+		
+		}
 
 		public this(){
 		}
 
 		public void Add(rect chunk){
 			if(!this.ContainsKey(chunk)){
-				Add(chunk,new Particle[chunk.Width/simulationSize,chunk.Height/simulationSize]);
+				Add(Chunk(chunk),new Particle[chunk.Width,chunk.Height]);
 			}
 		}
 
-		public void FindChunksInView(rect viewport,ref List<rect> outList){
-			outList=new List<rect>();
-			for(rect r in this){
-				if(r.Intersects(viewport)){
+		Chunk getChunk(rect r){
+			Chunk c=default;
+			for(Chunk b in this){
+				if(r.GetHashCode()==b.GetHashCode()){
+					c=b;
+				}
+			}
+			return c;
+		}
+
+		public bool ContainsKey(rect chunk){
+			for(Chunk c in this){
+				if(c.GetHashCode()==chunk.GetHashCode()){
+					return true;
+				}
+			}
+			return false;
+		}
+
+		public void FindChunksInView(rect viewport,ref List<Chunk> outList){
+			outList=new List<Chunk>();
+			for(Chunk r in this){
+				if(r.chunkBounds.Intersects(viewport)){
 					outList.Add(r);
 				}
 			}
@@ -37,22 +75,6 @@ namespace BeefSand.lib
 		}
 
 		public void GenerateTerrain(){
-			FastNoise noise = new .();
-
-			aabb2 worldAABB=.(0,0,0,0);
-
-			for (rect r in this){
-				worldAABB.Merge(r.ToAABB());
-			}
-			System.Diagnostics.Stopwatch t=new .()..Start();
-			for(int i=0; i<worldAABB.Width; i++){
-				for(int j=0; j<worldAABB.Height; j++){
-					//Console.WriteLine(noise.GetCellular(i,j));
-					sim.SetElement(i/4,j/4,Particles[2]);
-				}
-			}
-			t.Stop();
-			Console.WriteLine($"Generated terrain in {t.Elapsed.TotalSeconds} seconds");
 		}
 
 		public void Update(rect chunk, ref uint8 simulationClock){

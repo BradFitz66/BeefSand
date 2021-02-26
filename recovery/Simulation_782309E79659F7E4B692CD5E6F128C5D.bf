@@ -145,10 +145,6 @@ namespace BeefSand
 			particles[chunkRow, chunkColumn].pos = .(chunkRow, chunkColumn);
 			particles[chunkRow, chunkColumn].timer = simulationClock + 1;
 			particles[chunkRow, chunkColumn].stable = false;
-
-			for(int i=-3; i<3; i++){
-				//AAAAAAAAAAAAAAAA
-			}
 			
 			i.SetPixels(.(x, y, 1, 1), scope Color[](value.particleColor));
 		}
