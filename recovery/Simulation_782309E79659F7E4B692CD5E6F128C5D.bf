@@ -77,50 +77,18 @@ namespace BeefSand
 		{
 			sim = this;
 			chunks = new Chunks();
-			rect testChunk1 = .(0, 0, 976, 976);
-			rect testChunk2 = .(976, 0, 976, 976);
+			Chunk testChunk1 = Chunk(.(0, 0, simulationWidth, simulationHeight));
+			Chunk testChunk2 = Chunk(.(simulationWidth, 0, simulationWidth, simulationHeight));
 			chunks.Add(
 				testChunk1
-				);
+			);
 			chunks.Add(
-				testChunk2
-				);
-			aabb2 worldAABB = testChunk1.ToAABB();
-			worldAABB.Merge(testChunk2.ToAABB());
-			rect worldSize = worldAABB.ToRect();
-
-			i = new .(worldSize.Width, worldSize.Height);
-
-			c = new Color[1952 * 976]();
-			c.Populate(Color.CornflowerBlue);
-			i.SetPixels(.(0, 0, 1952, 976), c);
-			texture = new Texture(i);
-			texture.Filter = .Nearest;
-
+			testChunk2
+			);
+			Chunk chunk = chunks.FindChunkAtPoint(.(245, 0));
+			Console.WriteLine(testChunk2.chunkBounds.Width);
 			chunks.GenerateTerrain();
 		}
-
-		public static void Populate<T>(this T[] arr, T value)
-		{
-			for (int i = 0; i < arr.Count; i++)
-			{
-				arr[i] = value;
-			}
-		}
-
-		public void ExtractColor(rect chunk, ref Color[] array)
-		{
-			Particle[,] particles = chunks[chunk];
-			array = new Color[1952 * 976]();
-			array.Populate(Color.White);
-			for (int i = 0; i < particles.Count; i++)
-			{
-				int x = i % simulationWidth;
-				int y = i / simulationHeight;
-				array[i] = particles[x, y].particleColor;
-			}
-		}
-
 
 		public ~this()
 		{
@@ -132,35 +100,32 @@ namespace BeefSand
 
 		public void SetElement(int x, int y, Particle value)
 		{
-			rect chunk = chunks.FindChunkAtPoint(.(x * 4, y * 4));
+			Chunk chunk = chunks.FindChunkAtPoint(.(x, y));
 
-			Particle[,] particles = chunks[chunk];
-			if (!withinBounds(chunk, x, y))
-				return;
-			//Get row & column relative to the chunk position
-			int chunkRow=x-chunk.X*4;
-			int chunkColumn=y-chunk.Y*4;
-
-			particles[chunkRow, chunkColumn] = value;
-			particles[chunkRow, chunkColumn].pos = .(chunkRow, chunkColumn);
-			particles[chunkRow, chunkColumn].timer = simulationClock + 1;
-			particles[chunkRow, chunkColumn].stable = false;
 			
-			i.SetPixels(.(x, y, 1, 1), scope Color[](value.particleColor));
+			if (!withinBounds(chunk.chunkBounds, x, y) || (chunk.chunkBounds.Width==0 && chunk.chunkBounds.Height==0))
+				return;
+			Particle[,] particles = chunks[chunk];
+	
+			particles[x/4, y/4] = value;
+			particles[x/4, y/4].pos = .(x/4, y);
+			particles[x/4, y/4].timer = simulationClock + 1;
+			particles[x/4, y/4].stable = false;
+			
+			chunk.chunkRenderImage.SetPixels(.(x, y, 1, 1), scope Color[](value.particleColor));
 		}
 
 		static bool withinBounds(rect chunk, int x, int y)
 		{
-			return chunk.Contains(.(x + chunk.X, y + chunk.Y));
+			
+			return chunk.Contains(.(x, y));
 		}
 
 		public Particle GetElement(int x, int y)
 		{
-			rect chunk = chunks.FindChunkAtPoint(.(x * 4, y * 4));
-			if (withinBounds(chunk, x, y)){
-				int chunkRow=x-chunk.X/4;
-				int chunkColumn=y-chunk.Y/4;
-				return chunks[chunk][chunkRow, chunkColumn];
+			Chunk chunk = chunks.FindChunkAtPoint(.(x, y));
+			if (withinBounds(chunk.chunkBounds, x, y)){
+				return chunks[chunk][x, y];
 			}
 			else
 			{
@@ -173,19 +138,14 @@ namespace BeefSand
 		//Simulate a single frame^
 		public void Simulate(float dT)
 		{
-			rect viewport = Core.Window.RenderBounds;
-			List<rect> chunkInView=new List<rect>();
-			chunks.FindChunksInView(viewport,ref chunkInView);
-			for(int i=0; i<chunkInView.Count; i++){
-				chunks.Update(chunkInView[i],ref simulationClock);
-			}
+			
 
-			simulationClock += 1;
+			/*simulationClock += 1;
 			if (simulationClock > 254)
 			{
 				simulationClock = 0;
 			}
-			delete(chunkInView);
+			delete(chunkInView);*/
 		}
 		protected override void OnUpdate()
 		{
@@ -193,8 +153,6 @@ namespace BeefSand
 		}
 		public void Draw()
 		{
-			texture.SetData(i.Pixels);
-			Core.Draw.Image(texture, aabb2(0, 0, i.Width * 4, i.Height * 4), Color.White);
 			chunks.Draw();
 		}
 	}

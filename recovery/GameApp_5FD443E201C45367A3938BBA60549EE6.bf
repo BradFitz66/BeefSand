@@ -75,7 +75,7 @@ namespace BeefSand
 					if((x*x+y*y)<(radius*radius)/(4*4)){
 						int oX=(int)Math.Floor(x0);
 						int oY=(int)Math.Floor(y0);
-						sim.SetElement(oX/4+x,oY+y,draw);
+						sim.SetElement(oX*4+x,oY/4+y,draw);
 					}
 				}
 			}
