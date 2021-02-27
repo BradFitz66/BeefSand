@@ -15,11 +15,11 @@ namespace BeefSand
 
 		public static Particle[5] particles=.(
 		    //Color, timer, update, position, ID, density, max velocity, simulation reference
-			.(.(219,209,180,255), 0, => Sand, .(10, 10), 0,5,4,sim),
-			.(.tra, 0, => Air, .(0, 0), 1,0,0,sim),
-			.(.(100,100,100,255), 0, => Air, .(0, 0), 2,100,0,sim),
-			.(.(200,200,255,255), 0, => Water, .(0, 0),3,4,8,sim),
-			.(.(50,50,50,255), 0, => Oil, .(0, 0), 4,3,2,sim),
+			.(.(219,209,180,255), 0, => Sand, .(10, 10), 0,5,4,null),
+			.(.Transparent, 0, => Air, .(0, 0), 1,0,0,sim),
+			.(.(100,100,100,255), 0, => Air, .(0, 0), 2,100,0,null),
+			.(.(200,200,255,255), 0, => Water, .(0, 0),3,4,8,null),
+			.(.(50,50,50,255), 0, => Oil, .(0, 0), 4,3,2,null),
 
 		);
 
@@ -35,7 +35,7 @@ namespace BeefSand
 		public static void Oil(ref Particle p, float dT=0)
 		{
 
-		}
+		}Core.Input.MousePosition * (1f / 0.5f)
 
 		public static void Sand(ref Particle p, float dT=0)
 		{

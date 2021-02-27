@@ -13,7 +13,7 @@ namespace BeefSand
 		public static Simulation sim;
 		public static int64 particleCount;
 	}
-	class GameApp : Scene
+	public class GameApp : Scene
 	{
 		int isMouseDown = 0;
 		int32 mX;
@@ -22,17 +22,25 @@ namespace BeefSand
 		int selectedParticle=0;
 		bool isRunning = true;
 		Stopwatch t;
+
 		TimeSpan keypress;
+		float2 mouseWorldPos;
 		public this() : base(.ExactFit, Screen.Size)
 		{
 			Core.Atlas.AddDirectory("main","textures");
 			Core.Atlas.Finalize();
 			t=new Stopwatch()..Start();
 			keypress=t.Elapsed;
-			sim=new Simulation();
-			AddEntity(sim);
+			this.Camera.AddRenderer(new SceneRenderer(this) { BlendMode = .Normal });
+			this.Camera.SetDesignResolution(.(976,976),.ShowAllPixelPerfect);
+			let s = new Simulation();
+			s.Components.Add(new WorldCameraComponent());
 
+			AddEntity(s);
 			
+			for(int i=0; i<sim.chunks.chunkStorage.Count; i++){
+				AddEntity(sim.chunks.chunkStorage[i]);
+			}
 		}
 		public ~this()
 		{
@@ -43,11 +51,24 @@ namespace BeefSand
 		{
 			ImGuiImpl.Update();
 			isMouseDown=Core.Input.MouseCheck(.Left) ? 1 : 0;
-			mX=(int32)Core.Input.MousePosition.x;
-			mY=(int32)Core.Input.MousePosition.y;
+		
 			brushRadius+=(int32)Core.Input.MouseWheel.y;
 			brushRadius=Math.Max(5,brushRadius);
 
+			mouseWorldPos=Camera.ScreenToWorld(Core.Input.MousePosition);
+
+			if((Camera.Position.x<=0))
+			{
+				//Setting the x position directly doesn't seem to do anything. This does.
+				Camera.Position=Camera.Position * .(0,1);
+			}
+
+			if(Core.Input.KeyCheck(.A)){
+				Camera.Position+=.(-3,0);
+			}
+			if(Core.Input.KeyCheck(.D)){
+				Camera.Position+=.(3,0);
+			}
 
 			if(Core.Input.KeyCheck(.Left) && (t.Elapsed.TotalMilliseconds - keypress.TotalMilliseconds)>500){
 				selectedParticle--;
@@ -57,13 +78,19 @@ namespace BeefSand
 				selectedParticle++;
 				keypress=t.Elapsed;
 			}
+			
+
+
 
 			selectedParticle = (int)Math.Max(0,Math.Min(Particles.particles.Count-1,selectedParticle));
 			if (isMouseDown!=0)
 			{
-				DrawFilledCircle(mX, mY, brushRadius,Particles[selectedParticle]);
+				DrawFilledCircle((int)mouseWorldPos.x, (int)mouseWorldPos.y, brushRadius,Particles[selectedParticle]);
 			}
+
 			Entities.Update();
+
+			
 
 		}
 
@@ -81,6 +108,7 @@ namespace BeefSand
 			}
 		}
 
+
 		int counter=0;
 		public override void FixedUpdate()
 		{
@@ -93,7 +121,7 @@ namespace BeefSand
 			float2 textSize = Core.DefaultFont.MeasureString("Hello");
 			Core.Draw.Text(Core.DefaultFont,.(0,0),scope $"Drawing particle {Particles.particleNames[selectedParticle]}",Color.Black);
 			Core.Window.Resizable=false;
-			Core.Draw.HollowCircle(.(mX,mY),brushRadius,2,32,Color.Gray);
+			Core.Draw.HollowCircle(.(mouseWorldPos.x,mouseWorldPos.y),brushRadius,2,32,Color.Gray);
 
 			Core.Draw.Render(Core.Window,Screen.Matrix);
 		}

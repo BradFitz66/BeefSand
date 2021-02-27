@@ -60,46 +60,57 @@ namespace BeefSand
 	static
 	{
 		public const int simulationSize = 4;
-		public const int simulationWidth = 976 / simulationSize;
-		public const int simulationHeight = 976 / simulationSize;
+		public const int chunkWidth = 512 / simulationSize;
+		public const int chunkHeight = 1024 / simulationSize;
 		public static uint8 simulationClock;
 		public static float gravity = 9.81f;
 		public static rect simulationBounds;
 	}
 
-	class Simulation : Entity
+	public class Simulation : Entity
 	{
-		//Draw pixels onto texture.
-		public Texture texture;
-		public Atma.Image i;
 		public Chunks chunks;
-		public Color[] c;
+
 
 		public this()
 		{
+			sim=this;
 			simulationBounds=.(Core.Window.RenderBounds.X,Core.Window.RenderBounds.Y,Core.Window.RenderBounds.Width/simulationSize,Core.Window.RenderBounds.Height/simulationSize);
 
-			chunks = new Chunks(2,1);
-			
-
-			Console.WriteLine(chunks.FindChunkAtPoint(.(0,250)).particles);
-
-			chunks.GenerateTerrain();
+			chunks = new Chunks(10,1);
+			GenerateTerrain();
 		}
-
+		
 		public ~this()
 		{
-			delete (i);
-			delete (texture);
-			delete (c);
+	
 		}
 
 
+		public void GenerateTerrain()
+		{
+			FastNoise noise = scope .(DateTime.Now.Millisecond);
+			for(int x=0; x<chunkWidth*10; x++){
+				int sandY = (int)(noise.GetSimplex(x,0)*10);
+
+				for(int i=0; i<50; i++){
+					SetElement(x,(sandY+200)+i,Particles[0]);
+				}
+				
+			}
+		}
+		
 		public void SetElement(int x, int y, Particle value)
 		{
+
+			//Make sure x and y aren't outside the bounds of the world 
+			if(y>=chunkHeight*chunks.yChunks || x>=chunkWidth*chunks.xChunks)
+				return;
+
 			Chunk chunk = chunks.FindChunkAtPoint(.(x,y));
 
-			rect chunkBounds=.(x-x%simulationWidth,y-y%simulationHeight,simulationWidth,simulationHeight);
+			rect chunkBounds=.(x - x % chunkWidth,y - y % chunkHeight,chunkWidth,chunkHeight);
+
 			if (!withinBounds(chunkBounds, x, y) || (chunkBounds.Width==0 && chunkBounds.Height==0) || chunk==null)
 				return;
 
@@ -111,7 +122,7 @@ namespace BeefSand
 
 			for(int i=-3; i<3; i++){
 				for(int j=-3; j<3; j++){
-					if(chunkX+i>simulationWidth-1 || chunkY+j > simulationHeight-1 || chunkX+i<0 || chunkY+j<0)
+					if(chunkX+i>chunkWidth-1 || chunkY+j > chunkHeight || chunkX+i<0 || chunkY+j<0)
 						continue;
 					particles[chunkX+i,chunkY+j].stable=false;
 				}
@@ -132,31 +143,26 @@ namespace BeefSand
 
 		public Particle GetElement(int x, int y)
 		{
-			rect chunkBounds = .(x-x%simulationWidth,y-y%simulationHeight,simulationWidth,simulationHeight);
+			if(y>=chunkHeight*chunks.yChunks || x>=chunkWidth*chunks.xChunks)
+				return Particles[2];
+
+
+			rect chunkBounds = .(x-x%chunkWidth,y-y%chunkHeight,chunkWidth,chunkHeight);
 			Chunk chunk = chunks.GetChunkFromBounds(chunkBounds);
-			if (!withinBounds(chunkBounds, x, y) || x<0 || y<0 || (chunkBounds.Width==0 && chunkBounds.Height==0) || chunk==null)
-				return Particles[2];	
+			int chunkX=x-chunkBounds.X;
+			int chunkY=y-chunkBounds.Y;
+			if (!withinBounds(chunkBounds, x, y) || chunkX<0 || chunkY<0 || (chunkBounds.Width==0 && chunkBounds.Height==0) || chunk==null)
+				return Particles[2];
 
-
-
-			return chunk.particles[x-chunkBounds.X, y-chunkBounds.Y];
+			return chunk.particles[chunkX, chunkY];
 		}
 
-
-
-		//Simulate a single frame^
-		public void Simulate(float dT)
-		{
-			chunks.Update();
-		}
 		protected override void OnUpdate()
 		{
 			simulationBounds=.(Core.Window.RenderBounds.X,Core.Window.RenderBounds.Y,Core.Window.RenderBounds.Width/simulationSize,Core.Window.RenderBounds.Height/simulationSize);
-			Simulate(0);
 		}
 		public void Draw()
 		{
-			chunks.Draw();
 		}
 	}
 }

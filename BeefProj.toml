@@ -4,3 +4,6 @@ Dependencies = {corlib = "*", "Atma.Common" = "*", "Beef.Linq" = "*", "Atma.Enti
 [Project]
 Name = "BeefSand"
 StartupObject = "BeefSand.Program"
+
+[Configs.Release.Win64]
+VectorizeLoops = true
