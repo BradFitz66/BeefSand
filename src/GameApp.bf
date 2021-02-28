@@ -12,6 +12,14 @@ namespace BeefSand
 		public static GameApp app;
 		public static Simulation sim;
 		public static int64 particleCount;
+
+		public static void Debug(StringView message){
+			Console.ForegroundColor=ConsoleColor.DarkYellow;
+			Console.Write("SANDSIM: ");
+			Console.ForegroundColor=ConsoleColor.White;
+			Console.Write(message);
+			Console.Write("\n");
+		}
 	}
 	public class GameApp : Scene
 	{
@@ -31,8 +39,9 @@ namespace BeefSand
 			Core.Atlas.Finalize();
 			t=new Stopwatch()..Start();
 			keypress=t.Elapsed;
-			this.Camera.AddRenderer(new SceneRenderer(this) { BlendMode = .Normal });
-			this.Camera.SetDesignResolution(.(976,976),.ShowAllPixelPerfect);
+
+			this.Camera.AddRenderer(new SceneRenderer(this) { BlendMode = .Normal});
+
 			let s = new Simulation();
 			s.Components.Add(new WorldCameraComponent());
 
@@ -46,6 +55,8 @@ namespace BeefSand
 		{
 			delete (sim);
 		}
+
+
 
 		public override void Update()
 		{
@@ -102,7 +113,7 @@ namespace BeefSand
 					if((x*x+y*y)<(radius*radius)/(4*4)){
 						int oX=(int)Math.Floor(x0);
 						int oY=(int)Math.Floor(y0);
-						sim.SetElement(oX/4+x,oY/4+y,draw);
+						sim.SetElement(oX/simulationSize+x,oY/simulationSize+y,draw);
 					}
 				}
 			}
@@ -113,15 +124,14 @@ namespace BeefSand
 		public override void FixedUpdate()
 		{
 		}
-
+		
 		public override void Render()
 		{
 			base.Render();
-			sim.Draw();
-			float2 textSize = Core.DefaultFont.MeasureString("Hello");
+
 			Core.Draw.Text(Core.DefaultFont,.(0,0),scope $"Drawing particle {Particles.particleNames[selectedParticle]}",Color.Black);
-			Core.Window.Resizable=false;
-			Core.Draw.HollowCircle(.(mouseWorldPos.x,mouseWorldPos.y),brushRadius,2,32,Color.Gray);
+
+			Core.Draw.HollowCircle(.(Core.Input.MousePosition.x,Core.Input.MousePosition.y),brushRadius,2,32,Color.Gray);
 
 			Core.Draw.Render(Core.Window,Screen.Matrix);
 		}

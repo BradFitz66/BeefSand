@@ -7,9 +7,15 @@ namespace BeefSand.lib
 	{
 		public int2 chunkIndex;
 		public Image chunkRenderImage ~ delete _;
-		public Particle[,] particles = new Particle[,] ~ delete _;
+		public Particle[,] particles ~ delete _;
 		public Texture chunkRenderTexture ~ delete _;
 		public uint8 clock = 0;
+
+		public bool updating=false;
+		public bool drawing=false;
+
+		public rect chunkBounds{get; private set;};
+
 		rect cameraView;
 		public this(int2 index)
 		{
@@ -22,15 +28,16 @@ namespace BeefSand.lib
 
 		protected override void OnUpdate()
 		{
-			rect chunkBounds = .(chunkWidth * chunkIndex.x, chunkHeight * chunkIndex.y, chunkWidth, chunkHeight);
-			cameraView=.((int)Scene.Camera.Position.x/4,(int)Scene.Camera.Position.y/4,Scene.Camera.Width/4,Scene.Camera.Height/4);
-			if (!cameraView.Inflate(40).Intersects(chunkBounds))
+			chunkBounds = .(chunkWidth * chunkIndex.x, chunkHeight * chunkIndex.y, chunkWidth, chunkHeight);
+			cameraView=.((int)Scene.Camera.Position.x/simulationSize,(int)Scene.Camera.Position.y/simulationSize,Scene.Camera.Width/simulationSize,Scene.Camera.Height/simulationSize);
+			if (!cameraView.Inflate(10).Intersects(chunkBounds)){
+				updating=false;
 				return;
-
+			}
+			updating=true;
 			for (int x = 0; x < chunkWidth; x++)
 			{
-				//Without the -1, stuff gets REAL wacky. Not sure why.
-				for (int y = 0; y < chunkHeight - 1; y++)
+				for (int y = 0; y < chunkHeight; y++)
 				{
 					Particle p = particles[x, y];
 					if (p.id == 1 || p.stable || p.timer - clock == 1 || p.update == null)
@@ -44,12 +51,15 @@ namespace BeefSand.lib
 		}
 		public override void Render()
 		{
-			rect chunkBounds = .(chunkWidth * chunkIndex.x, chunkHeight * chunkIndex.y, chunkWidth*4, chunkHeight);
 			if (cameraView.Intersects(chunkBounds))
 			{
+				drawing=true;
 				chunkRenderTexture.SetData(chunkRenderImage.Pixels);
-				aabb2 a = rect((chunkIndex.x * chunkWidth) * 4, (chunkIndex.y * chunkHeight) * 4, chunkWidth * 4, chunkHeight * 4).ToAABB();
+				aabb2 a = rect((chunkIndex.x * chunkWidth) * simulationSize, (chunkIndex.y * chunkHeight) * simulationSize, chunkWidth * simulationSize, chunkHeight * simulationSize).ToAABB();
 				Core.Draw.Image(chunkRenderTexture, a, Color.White);
+			}
+			else{
+				drawing=false;
 			}
 		}
 	}

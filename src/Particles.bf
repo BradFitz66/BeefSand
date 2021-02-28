@@ -28,8 +28,42 @@ namespace BeefSand
 
 		public static void Water(ref Particle p,float dT=0)
 		{
+			int randNumber = r.Next(1,10);
+			int xMovement=randNumber > 5 ? -1 : 1;
+			Particle below = sim.GetElement(p.pos.x,p.pos.y+1);
+			Particle leftright = sim.GetElement(p.pos.x+xMovement,p.pos.y);
 
+			Particle left=sim.GetElement(p.pos.x-1,p.pos.y);
+			Particle right=sim.GetElement(p.pos.x+1,p.pos.y);
+
+			bool shouldSleep=left.id!=1 && right.id!=1 && below.id!=1;
+			Particle replacing=particles[3];
+
+			if(below.density<p.density){
+				p.stable=false;
+				replacing=below;
+				sim.SetElement(p.pos.x,p.pos.y+1,p);
+			}
+			else if(leftright.density<p.density){
+				p.stable=false;
+				replacing=leftright;
+				sim.SetElement(p.pos.x+xMovement,p.pos.y,p);
+			}
+			else{
+				if(p.sleepTimer<10 && shouldSleep){
+					p.sleepTimer++;
+				}
+				else if(p.sleepTimer>=10){
+					p.stable=true;
+				}
+				else if(!shouldSleep){
+					p.stable=false;
+				}
+			}
+
+			sim.SetElement(p.pos.x,p.pos.y,replacing);
 		}
+
 
 
 		public static void Oil(ref Particle p, float dT=0)
@@ -43,10 +77,10 @@ namespace BeefSand
 			int randNumber = r.Next(1,10);
 			int xMovement=randNumber > 5 ? -1 : 1;
 
-			Particle below = sim.GetElement((int32)p.pos.x, (int32)p.pos.y + 1);
-			Particle diagleftright = sim.GetElement((int32)p.pos.x+xMovement, (int32)p.pos.y + 1);
-			Particle diagleft = sim.GetElement((int32)p.pos.x-1, (int32)p.pos.y + 1);
-			Particle diagright = sim.GetElement((int32)p.pos.x+1, (int32)p.pos.y + 1);
+			Particle below = sim.GetElement(p.pos.x, p.pos.y + 1);
+			Particle diagleftright = sim.GetElement(p.pos.x+xMovement, p.pos.y + 1);
+			Particle diagleft = sim.GetElement(p.pos.x-1, p.pos.y + 1);
+			Particle diagright = sim.GetElement(p.pos.x+1, p.pos.y + 1);
 
 			//If we can still move, don't go to sleep. Diagleftright is unreliable due to the random movement.
 			bool shouldSleep=diagleft.id!=1 && diagright.id!=1;
@@ -55,13 +89,13 @@ namespace BeefSand
 			{
 				p.stable=false;
 				replacing=below;
-				sim.SetElement((int32)p.pos.x, ((int32)p.pos.y) + 1, p);
+				sim.SetElement(p.pos.x, (p.pos.y) + 1, p);
 			}
 			else if(diagleftright.density<p.density){
 				p.stable=false;
 				replacing=diagleftright;
 
-				sim.SetElement((int32)p.pos.x+xMovement, ((int32)p.pos.y) + 1, p);
+				sim.SetElement(p.pos.x+xMovement, (p.pos.y) + 1, p);
 			}
 		
 			else
@@ -79,7 +113,7 @@ namespace BeefSand
 				return;
 			}
 			
-			sim.SetElement((int32)p.pos.x, (int32)p.pos.y, replacing);
+			sim.SetElement(p.pos.x, p.pos.y, replacing);
 		}
 
 		public static void Air(ref Particle p, float dT=0) { }

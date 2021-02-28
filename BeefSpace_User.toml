@@ -1,7 +1,7 @@
 FileVersion = 1
 LastConfig = "Release"
 LastPlatform = "Win64"
-RecentFilesList = ["src\\lib\\Chunks.bf", "src\\lib\\Simulation.bf", "src\\GameApp.bf", "Disassembly", "Disassembly", "c:\\Program Files\\BeefLang\\BeefLibs\\SDL2\\src\\SDLApp.bf", "Disassembly", "build\\Debug_Win64\\BeefSand\\minkernel\\crts\\ucrt\\src\\appcrt\\internal\\report_runtime_error.cpp", "Disassembly", "Disassembly"]
+RecentFilesList = ["src\\lib\\Simulation.bf", "src\\Particles.bf", "src\\WorldCameraComponent.bf", "src\\lib\\Chunks.bf", "c:\\Program Files\\BeefLang\\BeefLibs\\Atma.Framework\\src\\Atma.Common\\src\\Graphics\\Rendering\\Camera2D.bf", "c:\\Program Files\\BeefLang\\BeefLibs\\Atma.Framework\\src\\Atma.Common\\src\\Graphics\\Images\\Aseprite.bf", "src\\GameApp.bf", "Disassembly", "Disassembly", "c:\\Program Files\\BeefLang\\BeefLibs\\SDL2\\src\\SDLApp.bf", "Disassembly", "build\\Debug_Win64\\BeefSand\\minkernel\\crts\\ucrt\\src\\appcrt\\internal\\report_runtime_error.cpp", "Disassembly", "Disassembly"]
 
 [MainWindow]
 X = 64
@@ -42,21 +42,56 @@ DefaultDocumentsTabbedView = true
 Type = "TabbedView"
 
 [[MainDockingFrame.DockedWidgets.DockedWidgets.Tabs]]
-Active = true
+TabLabel = "Particles.bf"
+TabWidth = 103.0
+Type = "SourceViewPanel"
+FilePath = "src\\Particles.bf"
+CursorPos = 923
+ProjectName = "BeefSand"
+
+[[MainDockingFrame.DockedWidgets.DockedWidgets.Tabs]]
+TabLabel = "WorldCameraComponent.bf"
+TabWidth = 204.0
+Type = "SourceViewPanel"
+FilePath = "src\\WorldCameraComponent.bf"
+CursorPos = 281
+ProjectName = "BeefSand"
+
+[[MainDockingFrame.DockedWidgets.DockedWidgets.Tabs]]
+TabLabel = "Aseprite.bf"
+TabWidth = 103.0
+Type = "SourceViewPanel"
+FilePath = "c:\\Program Files\\BeefLang\\BeefLibs\\Atma.Framework\\src\\Atma.Common\\src\\Graphics\\Images\\Aseprite.bf"
+CursorPos = 25211
+VertPos = 12549.0
+ProjectName = "Atma.Common"
+
+[[MainDockingFrame.DockedWidgets.DockedWidgets.Tabs]]
+TabLabel = "Camera2D.bf"
+TabWidth = 116.0
+Type = "SourceViewPanel"
+FilePath = "c:\\Program Files\\BeefLang\\BeefLibs\\Atma.Framework\\src\\Atma.Common\\src\\Graphics\\Rendering\\Camera2D.bf"
+CursorPos = 8662
+VertPos = 3975.0
+ProjectName = "Atma.Common"
+
+[[MainDockingFrame.DockedWidgets.DockedWidgets.Tabs]]
 TabLabel = "Chunks.bf"
 TabWidth = 96.0
 Type = "SourceViewPanel"
 FilePath = "src\\lib\\Chunks.bf"
-CursorPos = 116
+CursorPos = 1373
+VertPos = 225.0
 ProjectName = "BeefSand"
 
 [[MainDockingFrame.DockedWidgets.DockedWidgets.Tabs]]
+Active = true
 TabLabel = "Simulation.bf"
 TabWidth = 115.0
 Type = "SourceViewPanel"
 FilePath = "src\\lib\\Simulation.bf"
-CursorPos = 3291
-VertPos = 2019.0
+CursorPos = 1371
+VertPos = 765.0
 ProjectName = "BeefSand"
 
 [[MainDockingFrame.DockedWidgets.DockedWidgets.Tabs]]
@@ -64,8 +99,8 @@ TabLabel = "GameApp.bf"
 TabWidth = 103.0
 Type = "SourceViewPanel"
 FilePath = "src\\GameApp.bf"
-CursorPos = 914
-VertPos = 300.0
+CursorPos = 682
+VertPos = 765.0
 ProjectName = "BeefSand"
 
 [[MainDockingFrame.DockedWidgets]]
