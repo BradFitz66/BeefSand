@@ -17,7 +17,8 @@ namespace BeefSand
 		public static int Main()
 		{
 			r = new Random();
-			return Atma.Core.RunInitialScene<GameApp>("Falling Sand", 976, 976);
+
+			return Atma.Core.RunInitialScene<GameApp>("Falling Sand", chunkWidth*simulationSize, chunkHeight*simulationSize);
 		}
 
 	}

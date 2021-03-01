@@ -30,7 +30,7 @@ namespace BeefSand.lib
 		{
 			chunkBounds = .(chunkWidth * chunkIndex.x, chunkHeight * chunkIndex.y, chunkWidth, chunkHeight);
 			cameraView=.((int)Scene.Camera.Position.x/simulationSize,(int)Scene.Camera.Position.y/simulationSize,Scene.Camera.Width/simulationSize,Scene.Camera.Height/simulationSize);
-			if (!cameraView.Inflate(10).Intersects(chunkBounds)){
+			if (!cameraView.Inflate(20).Intersects(chunkBounds)){
 				updating=false;
 				return;
 			}
@@ -39,12 +39,16 @@ namespace BeefSand.lib
 			{
 				for (int y = 0; y < chunkHeight; y++)
 				{
-					Particle p = particles[x, y];
-					if (p.id == 1 || p.stable || p.timer - clock == 1 || p.update == null)
+
+					if (particles[x, y].id == 1 || particles[x, y].stable==true || particles[x, y].timer - clock == 1 || particles[x, y].update == null || particles[x, y].solid==true)
 					{
+						
 						continue;
 					}
-					p.update(ref p, 0);
+					if(particles[x,y].id==0){
+					}
+					particles[x, y].update(ref particles[x,y]);
+
 				}
 			}
 			clock += 1;
@@ -57,6 +61,10 @@ namespace BeefSand.lib
 				chunkRenderTexture.SetData(chunkRenderImage.Pixels);
 				aabb2 a = rect((chunkIndex.x * chunkWidth) * simulationSize, (chunkIndex.y * chunkHeight) * simulationSize, chunkWidth * simulationSize, chunkHeight * simulationSize).ToAABB();
 				Core.Draw.Image(chunkRenderTexture, a, Color.White);
+				if(debug){
+					rect worldChunkBounds=.(chunkBounds.X*simulationSize,chunkBounds.Y*simulationSize,chunkBounds.Width*simulationSize,chunkBounds.Height*simulationSize);
+					Core.Draw.HollowRect(worldChunkBounds,4,Color.Red);
+				}
 			}
 			else{
 				drawing=false;
@@ -92,7 +100,7 @@ namespace BeefSand.lib
 		{
 			return (chunkStorage[bounds.X / chunkWidth, bounds.Y / chunkHeight]);
 		}
-
+		
 		[Inline]
 		public Chunk FindChunkAtPoint(int2 pos)
 		{

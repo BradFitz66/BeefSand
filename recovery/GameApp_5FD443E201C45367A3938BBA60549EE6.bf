@@ -9,13 +9,14 @@ namespace BeefSand
 {
 	static
 	{
-		public static GameApp app;
+		public static GameApp app ~ delete _;
 		public static Simulation sim;
 		public static int64 particleCount;
+		public static bool debug=false;
 
-		public static void Debug(StringView message){
+		public static void DebugLog(StringView message){
 			Console.ForegroundColor=ConsoleColor.DarkYellow;
-			Console.Write("SANDSIM: ");
+			Console.Write("SANDSIM:DEBUG: ");
 			Console.ForegroundColor=ConsoleColor.White;
 			Console.Write(message);
 			Console.Write("\n");
@@ -24,17 +25,18 @@ namespace BeefSand
 	public class GameApp : Scene
 	{
 		int isMouseDown = 0;
-		int32 mX;
-		int32 mY;
 		int32 brushRadius = 100;
 		int selectedParticle=0;
 		bool isRunning = true;
 		Stopwatch t;
 
+		int camSpeed=5;
+
 		TimeSpan keypress;
 		float2 mouseWorldPos;
 		public this() : base(.ExactFit, Screen.Size)
 		{
+			
 			Core.Atlas.AddDirectory("main","textures");
 			Core.Atlas.Finalize();
 			t=new Stopwatch()..Start();
@@ -43,8 +45,8 @@ namespace BeefSand
 			this.Camera.AddRenderer(new SceneRenderer(this) { BlendMode = .Normal});
 
 			let s = new Simulation();
-			s.Components.Add(new WorldCameraComponent());
-
+			Camera.SetDesignResolution(1024,768,.NoBorder);
+			
 			AddEntity(s);
 			
 			for(int i=0; i<sim.chunks.chunkStorage.Count; i++){
@@ -53,9 +55,8 @@ namespace BeefSand
 		}
 		public ~this()
 		{
-			delete (sim);
 		}
-
+		
 
 
 		public override void Update()
@@ -71,15 +72,41 @@ namespace BeefSand
 			if((Camera.Position.x<=0))
 			{
 				//Setting the x position directly doesn't seem to do anything. This does.
-				Camera.Position=Camera.Position * .(0,1);
+				Camera.Position+= .(camSpeed,0);
+			}
+			
+			if((Camera.Position.y<=0))
+			{
+				//Setting the x position directly doesn't seem to do anything. This does.
+				Camera.Position+= .(0,camSpeed);
+			}
+
+			if((Camera.Position.x+Camera.Width)>=(chunkWidth*sim.chunks.xChunks)*simulationSize){
+				Camera.Position+=.(-camSpeed,0);
+			}
+			
+			if((Camera.Position.y+Camera.Height)>=(chunkHeight*sim.chunks.yChunks)*simulationSize){
+				Camera.Position+=.(0,-camSpeed);
+			}
+
+			if(Core.Input.KeyCheck(.LAlt)&&(t.Elapsed.TotalMilliseconds - keypress.TotalMilliseconds)>500){
+				debug=!debug;
+				keypress=t.Elapsed;
 			}
 
 			if(Core.Input.KeyCheck(.A)){
-				Camera.Position+=.(-3,0);
+				Camera.Position+=.(-camSpeed,0);
 			}
 			if(Core.Input.KeyCheck(.D)){
-				Camera.Position+=.(3,0);
+				Camera.Position+=.(camSpeed,0);
 			}
+			if(Core.Input.KeyCheck(.W)){
+				Camera.Position+=.(0,-camSpeed);
+			}
+			if(Core.Input.KeyCheck(.S)){
+				Camera.Position+=.(0,camSpeed);
+			}
+
 
 			if(Core.Input.KeyCheck(.Left) && (t.Elapsed.TotalMilliseconds - keypress.TotalMilliseconds)>500){
 				selectedParticle--;
@@ -101,7 +128,6 @@ namespace BeefSand
 
 			Entities.Update();
 
-			
 
 		}
 
@@ -110,10 +136,10 @@ namespace BeefSand
 		{
 			for(int y=(int)Math.Floor(-radius/simulationSize); y<(int)Math.Floor(radius/simulationSize); y++){
 				for(int x=(int)Math.Floor(-radius/simulationSize); x<(int)Math.Floor(radius/simulationSize); x++){
-					if((x*x+y*y)<(radius*radius)/(4*4)){
+					if((x*x+y*y)<(radius*radius)/(simulationSize*simulationSize)){
 						int oX=(int)Math.Floor(x0);
 						int oY=(int)Math.Floor(y0);
-						sim.SetElement(oX/simulationSize+x,oY/simu+y,draw);
+						sim.SetElement(oX/simulationSize+x,oY/simulationSize+y,draw);
 					}
 				}
 			}
@@ -129,10 +155,29 @@ namespace BeefSand
 		{
 			base.Render();
 
-			Core.Draw.Text(Core.DefaultFont,.(0,0),scope $"Drawing particle {Particles.particleNames[selectedParticle]}",Color.Black);
+			if(debug){
+				int drawingAmount=0;
+				int updatingAmount=0;
+				for(int i=0; i<sim.chunks.chunkStorage.Count; i++){
+					if(sim.chunks.chunkStorage[i].updating){
+						updatingAmount++;
+					}
+					if(sim.chunks.chunkStorage[i].drawing){
+						drawingAmount++;
+					}
+				}
+				int particleAmount = (chunkWidth*chunkHeight)*updatingAmount;
+				
+				Core.Draw.Text(Core.DefaultFont,.(0,25),scope $"Drawing {drawingAmount} chunks",Color.White);
+				Core.Draw.Text(Core.DefaultFont,.(0,50),scope $"Updating {updatingAmount} chunks (updating a maximum of {particleAmount} particles)",Color.White);
+				int2 MPos=Camera.ScreenToWorld(Core.Input.MousePosition);
+				int2 CorrectedMPos=.(MPos.x/simulationSize,MPos.y/simulationSize);
+				Particle hoveredParticle=sim.GetElement(CorrectedMPos);
+				Core.Draw.Text(Core.DefaultFont,Core.Input.MousePosition+.(30,30),scope $" {Particles.particleNames[hoveredParticle.id]} {Camera.ScreenToWorld(Core.Input.MousePosition)} "..Append(hoveredParticle.stable ? "Stable" : "Unstable"),Color.White,.(0.5f,0.5f));
+			}
 
+			Core.Draw.Text(Core.DefaultFont,.(0,0),scope $"Drawing particle {Particles.particleNames[selectedParticle]}",Color.White);
 			Core.Draw.HollowCircle(.(Core.Input.MousePosition.x,Core.Input.MousePosition.y),brushRadius,2,32,Color.Gray);
-
 			Core.Draw.Render(Core.Window,Screen.Matrix);
 		}
 	}
