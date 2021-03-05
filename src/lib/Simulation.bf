@@ -6,8 +6,7 @@ using Atma;
 
 namespace BeefSand
 {
-	//A tile is a group of particles that can be moved. This allows for stuff like a player that can interact with the
-	// simulation
+	//A tile is a group of particles that can be moved. This allows for stuff like a player that can interact with the simulation
 	struct Tile
 	{
 		public Texture sprite;
@@ -46,8 +45,7 @@ namespace BeefSand
 		}
 	}
 
-
-	typealias ParticleUpdate = function (bool,int2)(Particle*);
+	typealias ParticleUpdate = function (bool, int2)(Particle*);
 	struct Particle
 	{
 		public Color particleColor;
@@ -83,7 +81,7 @@ namespace BeefSand
 			density = d;
 			maxVelocity = mV;
 			velocity = .(0, 0);
-			solid=s;
+			solid = s;
 		}
 		public int64 GetHashCode()
 		{
@@ -104,7 +102,7 @@ namespace BeefSand
 
 	public class Simulation : Entity
 	{
-		public Chunks chunks;
+		public Chunks chunks ~ delete _;
 		public List<Tile> tiles ~ delete _;
 
 		public this()
@@ -112,12 +110,13 @@ namespace BeefSand
 			sim = this;
 			tiles = new List<Tile>();
 			chunks = new Chunks(10, 10);
+
 			GenerateTerrain();
+
 			DebugLog(scope $"Initialized with a simulation size of {chunkWidth*chunks.xChunks}x{chunkHeight*chunks.yChunks}");
 			DebugLog(scope $"Initialized with a world size of {(chunkWidth*chunks.xChunks)*simulationSize}x{(chunkHeight*chunks.yChunks)*simulationSize}");
 
 			Texture t = scope Sprite(Core.Atlas["main/chick"]).Subtexture.Texture;
-
 
 			tiles.Add(
 				.(t, Particles[2])
@@ -147,11 +146,9 @@ namespace BeefSand
 					else
 					{
 						SetElement(x, y, Particles[1], false);
-
 					}
 				}
 			}
-
 			s.Stop();
 			DebugLog(scope $"Generated terrain in {s.Elapsed.TotalSeconds} seconds");
 		}
@@ -171,11 +168,10 @@ namespace BeefSand
 			SetElement(pos.x, pos.y, value);
 		}
 
-		public void SetElement(int x, int y, Particle value, bool awakeOther = true, bool newParticle=false)
+		public void SetElement(int x, int y, Particle value, bool awakeOther = true, bool newParticle = false)
 		{
 
-			//Make sure
-			// x and y aren't outside the bounds of the world
+			//Make sure x and y aren't outside the bounds of the world
 			if (!withinWorldBounds(x, y))
 				return;
 			if (awakeOther)
@@ -195,28 +191,28 @@ namespace BeefSand
 			}
 
 			Chunk chunk = chunks.GetChunkFromPoint(.(x, y));
-			rect chunkBounds = .(x - x % chunkWidth, y - y % chunkHeight, chunkWidth, chunkHeight);//Calculate bounds of
-			// a chunk
 
 			bool shouldDirtyChunk = (value.id != 1 && value.stable != true && awakeOther);
 			bool shouldUpdDirtyRect = (value.id != 1 && value.stable != true && awakeOther && newParticle);
 
-
 			Particle[] particles = chunk.particles;
 
-			rect bounds = chunkBounds;
+			rect bounds = chunk.chunkBounds;
+
 			int chunkX = (x - bounds.X);
 			int chunkY = (y - bounds.Y);
-			if (shouldDirtyChunk){
-				chunk.dirty=true;
-				chunk.sleepTimer=0;
+
+			if (shouldDirtyChunk)
+			{
+				chunk.dirty = true;
+				chunk.sleepTimer = 0;
 			}
-			if(shouldUpdDirtyRect){
-				chunk.dirty=true;
-				chunk.UpdateDirtyRect(.(chunkX,chunkY));
+			if (shouldUpdDirtyRect)
+			{
+				chunk.dirty = true;
+				chunk.UpdateDirtyRect(.(chunkX, chunkY));
 			}
-			
-			
+
 			particles[chunkY * chunkWidth + chunkX] = value;
 			particles[chunkY * chunkWidth + chunkX].timer = chunk.clock + 1;
 			particles[chunkY * chunkWidth + chunkX].pos = .(x, y);
@@ -236,13 +232,11 @@ namespace BeefSand
 			return GetElement(pos.x, pos.y);
 		}
 
-		//Should
-		// only be used if you want to modify a particle at a position.
+		//Should only be used if you want to modify a particle at a position.
 		public Particle* GetElementReference(int x, int y)
 		{
 			if (!withinWorldBounds(x, y))
-				//ew
-				return &Particle(Color.Transparent, 0, null, .(x, y), 2, 100, 0, null, true);
+				return &Particles.particles[2];
 
 			rect chunkBounds = .(x - x % chunkWidth, y - y % chunkHeight, chunkWidth, chunkHeight);
 			Chunk chunk = chunks.GetChunkFromBounds(chunkBounds);
@@ -252,8 +246,7 @@ namespace BeefSand
 			return &chunk.particles[chunkY * chunkWidth + chunkX];
 		}
 
-		//Should
-		// only be used for if you need to check if a certain particle exists at a position
+		//Should only be used for if you need to check if a certain particle exists at a position
 		public Particle GetElement(int x, int y)
 		{
 			if (!withinWorldBounds(x, y))
@@ -266,7 +259,6 @@ namespace BeefSand
 
 			return chunk.particles[chunkY * chunkWidth + chunkX];
 		}
-
 
 		public override void Render()
 		{

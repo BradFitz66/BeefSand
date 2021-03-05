@@ -27,7 +27,7 @@ namespace BeefSand
 			.(.(200, 200, 255, 255), 0, => GenericFluid, .(0, 0), 3, 4, 8, null),
 			.(.(50, 50, 50, 255), 0, => GenericFluid, .(0, 0), 4, 3, 2, null),
 			.(.(200, 200, 200, 100), 0, => Steam, .(0, 0), 5, 1, 1, null)
-			);
+		);
 
 		public static Particle this[int ind] => particles[ind];
 
@@ -66,7 +66,7 @@ namespace BeefSand
 				prevPos = p.pos;
 				sim.SetElement(replacing.pos, *p);
 				sim.SetElement(prevPos, replacing);
-				return (true,replacing.pos);
+				return (true,p.pos+.(0,1));
 			}
 			else if (diagleftright.density < p.density)
 			{
@@ -75,7 +75,7 @@ namespace BeefSand
 				sim.SetElement(replacing.pos, *p);
 				sim.SetElement(prevPos, replacing);
 
-				return (true,replacing.pos);
+				return (true,p.pos+.(xMovement,1));
 			}
 			return (!shouldSleep,p.pos);
 		}

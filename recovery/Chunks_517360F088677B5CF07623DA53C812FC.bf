@@ -8,10 +8,12 @@ namespace BeefSand.lib
 	class Chunk : Entity
 	{
 		public int2 chunkIndex;
+		public int sleepTimer = 0;
+		public uint8 clock = 0;
+
 		public Image chunkRenderImage ~ delete _;
 		public Particle[] particles ~ delete _;
 		public Texture chunkRenderTexture ~ delete _;
-		public uint8 clock = 0;
 
 		public bool dirty = false;
 		public bool updating = false;
@@ -19,18 +21,17 @@ namespace BeefSand.lib
 
 		public rect dirtyrect;
 		public rect dirtyrectprev;
-
-		public int sleepTimer = 0;
-
 		public rect chunkBounds { get; private set; };
-
 		rect cameraView;
+
 		public this(int2 index)
 		{
 			chunkIndex = index;
 			chunkRenderImage = new Image(chunkWidth, chunkHeight, Color.Transparent);
+
 			chunkRenderTexture = new .(chunkRenderImage);
 			chunkRenderTexture.Filter = .Nearest;
+
 			chunkBounds = .(chunkWidth * chunkIndex.x, chunkHeight * chunkIndex.y, chunkWidth, chunkHeight);
 			particles = new Particle[chunkRenderImage.Width * chunkRenderImage.Height];
 			dirtyrect = .(chunkWidth * chunkIndex.x, chunkHeight * chunkIndex.y, chunkWidth, chunkHeight);
@@ -44,14 +45,8 @@ namespace BeefSand.lib
 		public void UpdateDirtyRect(int2 newPos)
 		{
 			dirtyrect.Merge(newPos);
-			if(chunkBounds.outter.Contains(newPos)){
-				Chunk n = sim.chunks.GetChunkFromPoint(newPos);
-				if(n.chunkBounds.Contains(newPos)){
-					n.dirtyrect.Merge(newPos);
-					n.dirtyrect=n.dirtyrect.Intersection(n.chunkBounds);
-				}
-			}
-			dirtyrect=dirtyrect.Intersection(chunkBounds)
+			//dirtyrect.Inflate(2);
+			dirtyrect = dirtyrect.Intersection(chunkBounds);
 		}
 
 		protected override void OnUpdate()
@@ -63,33 +58,25 @@ namespace BeefSand.lib
 				return;
 			}
 			updating = true;
+
 			minX = chunkBounds.Max.x;
 			minY = chunkBounds.Max.y;
 			maxX = chunkBounds.X;
 			maxY = chunkBounds.Y;
+
 			for (int x = dirtyrect.Left - chunkBounds.X; x < dirtyrect.Right - chunkBounds.X; x++)
 			{
 				for (int y = dirtyrect.Top - chunkBounds.Y; y < dirtyrect.Bottom - chunkBounds.Y; y++)
 				{
-					/*if (!sim.withinWorldBounds(x, y))
-						continue;*/
-
 					Particle* p = &particles[y * chunkWidth + x];
 					if (p.id == 1 || p.stable == true || p.timer - clock == 1 || p.update == null || p.solid == true)
 						continue;
-
-					/*if (p.sleepTimer >= 100)
-					{
-						p.sleepTimer = 0;
-						p.stable = true;
-						continue;
-					}*/
 					p.lifetimer += 1;
+					
 					(bool, int2) upd = p.update(&particles[y * chunkWidth + x]);
 					if (upd.0)
 					{
 						dirty = true;
-
 						minX = Math.Min(minX, upd.1.x);
 						minY = Math.Min(minY, upd.1.y);
 						maxX = Math.Max(maxX, upd.1.x);
@@ -97,20 +84,23 @@ namespace BeefSand.lib
 					}
 				}
 			}
-
 			dirtyrect = .(.(minX, minY), .(maxX, maxY));
-			dirtyrect = dirtyrect.Inflate(10);
 
-			for (var p in chunkBounds.boundary)
+			//dirtyrect is being inflated by this much to stop particles from going out of bounds of the dirty rect and
+			// not being updated.
+			dirtyrect = dirtyrect.Inflate(20);
+
+			//Update a neighbouring chunk dirty rect if one of this chunks particles enters it while it's updating. Doesn't really seem to work a lot of the time.
+			//Tried placing this before I inflate too. Doesn't seem to change anything.
+			for (var p in dirtyrect.outter)
 			{
 				if (!this.chunkBounds.Contains(p) && sim.GetElement(p).id != 1 && !sim.GetElement(p).solid)
 				{
 					Chunk n = sim.chunks.GetChunkFromPoint(p);
-					if (n.chunkBounds != n.dirtyrect && n != this)
+					//just incase.
+					if (n != this)
 					{
-						n.dirtyrect.Merge(p);
-
-						n.dirtyrect = n.dirtyrect.Intersection(n.chunkBounds);
+						n.UpdateDirtyRect(p);
 					}
 				}
 			}
@@ -119,9 +109,12 @@ namespace BeefSand.lib
 
 			if (dirtyrect == chunkBounds)
 			{
+				//If dirty rect is same as chunk bounds (meaning it's not updating anything, most likely), increase
+				// chunk's sleep timer
 				sleepTimer++;
 				if (sleepTimer > 250)
 				{
+					//Force chunk to be not dirty once timer has reached threshold.
 					sleepTimer = 0;
 					dirty = false;
 				}
@@ -155,7 +148,7 @@ namespace BeefSand.lib
 
 	public class Chunks
 	{
-		public readonly Chunk[,] chunkStorage ~ DeleteContainerAndItems!(_);
+		public readonly Chunk[,] chunkStorage ~ delete ;
 		public readonly int xChunks = 0;
 		public readonly int yChunks = 0;
 

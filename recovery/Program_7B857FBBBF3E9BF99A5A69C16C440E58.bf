@@ -18,7 +18,7 @@ namespace BeefSand
 		{
 			r = new Random();
 
-			return Atma.Core.RunInitialScene<GameApp>("Falling Sand", 1280, 720);
+			return Atma.Core.RunInitialScene<GameApp>("Falling Sand", 640, 640);
 		}
 
 	}
@@ -37,6 +37,7 @@ namespace Atma
 		{
 			Core.Emitter.RemoveObserver<CoreEvents.Initialize>(scope => Initialize);
 		}
+
 		 	
 		static void Initialize(CoreEvents.Initialize e)
 		{

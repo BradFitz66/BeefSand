@@ -37,6 +37,7 @@ namespace Atma
 		{
 			Core.Emitter.RemoveObserver<CoreEvents.Initialize>(scope => Initialize);
 		}
+
 		 	
 		static void Initialize(CoreEvents.Initialize e)
 		{
