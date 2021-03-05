@@ -1,20 +1,28 @@
 using System;
 using Atma;
+using System.Linq;
 using System.Collections;
 namespace BeefSand.lib
 {
+	[Optimize]
 	class Chunk : Entity
 	{
 		public int2 chunkIndex;
 		public Image chunkRenderImage ~ delete _;
-		public Particle[,] particles ~ delete _;
+		public Particle[] particles ~ delete _;
 		public Texture chunkRenderTexture ~ delete _;
 		public uint8 clock = 0;
 
-		public bool updating=false;
-		public bool drawing=false;
+		public bool dirty = false;
+		public bool updating = false;
+		public bool drawing = false;
 
-		public rect chunkBounds{get; private set;};
+		public rect dirtyrect;
+		public rect dirtyrectprev;
+
+		public int sleepTimer = 0;
+
+		public rect chunkBounds { get; private set; };
 
 		rect cameraView;
 		public this(int2 index)
@@ -23,32 +31,99 @@ namespace BeefSand.lib
 			chunkRenderImage = new Image(chunkWidth, chunkHeight, Color.Transparent);
 			chunkRenderTexture = new .(chunkRenderImage);
 			chunkRenderTexture.Filter = .Nearest;
-			particles = new Particle[chunkRenderImage.Width, chunkRenderImage.Height];
+			chunkBounds = .(chunkWidth * chunkIndex.x, chunkHeight * chunkIndex.y, chunkWidth, chunkHeight);
+			particles = new Particle[chunkRenderImage.Width * chunkRenderImage.Height];
+			dirtyrect = .(chunkWidth * chunkIndex.x, chunkHeight * chunkIndex.y, chunkWidth, chunkHeight);
+		}
+
+		int minX = chunkWidth;
+		int minY = chunkHeight;
+		int maxX = 0;
+		int maxY = 0;
+
+		public void UpdateDirtyRect(int2 newPos)
+		{
+			dirtyrect.Merge(newPos);
+			if(chunkBounds.outter.Contains(newPos)){
+				Chunk n = sim.chunks.GetChunkFromPoint(newPos);
+				if(n.chunkBounds.Contains(newPos)){
+					n.dirtyrect.Merge(newPos);
+					n.dirtyrect=n.dirtyrect.Intersection(n.chunkBounds);
+				}
+			}
+			dirtyrect=dirtyrect.Intersection(chunkBounds);
 		}
 
 		protected override void OnUpdate()
 		{
-			chunkBounds = .(chunkWidth * chunkIndex.x, chunkHeight * chunkIndex.y, chunkWidth, chunkHeight);
-			cameraView=.((int)Scene.Camera.Position.x/simulationSize,(int)Scene.Camera.Position.y/simulationSize,Scene.Camera.Width/simulationSize,Scene.Camera.Height/simulationSize);
-			if (!cameraView.Inflate(20).Intersects(chunkBounds)){
-				updating=false;
+			cameraView = .((int)Scene.Camera.Position.x / simulationSize, (int)Scene.Camera.Position.y / simulationSize, Scene.Camera.Width / simulationSize, Scene.Camera.Height / simulationSize);
+			if (!dirty)
+			{
+				updating = false;
 				return;
 			}
-			updating=true;
-			for (int x = 0; x < chunkWidth; x++)
+			updating = true;
+			minX = chunkBounds.Max.x;
+			minY = chunkBounds.Max.y;
+			maxX = chunkBounds.X;
+			maxY = chunkBounds.Y;
+			for (int x = dirtyrect.Left - chunkBounds.X; x < dirtyrect.Right - chunkBounds.X; x++)
 			{
-				for (int y = 0; y < chunkHeight; y++)
+				for (int y = dirtyrect.Top - chunkBounds.Y; y < dirtyrect.Bottom - chunkBounds.Y; y++)
 				{
+					/*if (!sim.withinWorldBounds(x, y))
+						continue;*/
 
-					if (particles[x, y].id == 1 || particles[x, y].stable==true || particles[x, y].timer - clock == 1 || particles[x, y].update == null || particles[x, y].solid==true)
-					{
-						
+					Particle* p = &particles[y * chunkWidth + x];
+					if (p.id == 1 || p.stable == true || p.timer - clock == 1 || p.update == null || p.solid == true)
 						continue;
-					}
-					if(particles[x,y].id==0){
-					}
-					particles[x, y].update(ref particles[x,y]);
 
+					/*if (p.sleepTimer >= 100)
+					{
+						p.sleepTimer = 0;
+						p.stable = true;
+						continue;
+					}*/
+					p.lifetimer += 1;
+					(bool, int2) upd = p.update(&particles[y * chunkWidth + x]);
+					if (upd.0)
+					{
+						dirty = true;
+
+						minX = Math.Min(minX, upd.1.x);
+						minY = Math.Min(minY, upd.1.y);
+						maxX = Math.Max(maxX, upd.1.x);
+						maxY = Math.Max(maxY, upd.1.y);
+					}
+				}
+			}
+
+			dirtyrect = .(.(minX, minY), .(maxX, maxY));
+			dirtyrect = dirtyrect.Inflate(20);
+
+			for (var p in chunkBounds.boundary)
+			{
+				if (!this.chunkBounds.Contains(p) && sim.GetElement(p).id != 1 && !sim.GetElement(p).solid)
+				{
+					Chunk n = sim.chunks.GetChunkFromPoint(p);
+					if (n.chunkBounds != n.dirtyrect && n != this)
+					{
+						n.dirtyrect.Merge(p);
+
+						n.dirtyrect = n.dirtyrect.Intersection(n.chunkBounds);
+					}
+				}
+			}
+
+			dirtyrect = dirtyrect.Intersection(chunkBounds);
+
+			if (dirtyrect == chunkBounds)
+			{
+				sleepTimer++;
+				if (sleepTimer > 250)
+				{
+					sleepTimer = 0;
+					dirty = false;
 				}
 			}
 			clock += 1;
@@ -57,17 +132,23 @@ namespace BeefSand.lib
 		{
 			if (cameraView.Intersects(chunkBounds))
 			{
-				drawing=true;
+				drawing = true;
 				chunkRenderTexture.SetData(chunkRenderImage.Pixels);
 				aabb2 a = rect((chunkIndex.x * chunkWidth) * simulationSize, (chunkIndex.y * chunkHeight) * simulationSize, chunkWidth * simulationSize, chunkHeight * simulationSize).ToAABB();
 				Core.Draw.Image(chunkRenderTexture, a, Color.White);
-				if(debug){
-					rect worldChunkBounds=.(chunkBounds.X*simulationSize,chunkBounds.Y*simulationSize,chunkBounds.Width*simulationSize,chunkBounds.Height*simulationSize);
-					Core.Draw.HollowRect(worldChunkBounds,4,Color.Red);
+				if (debug)
+				{
+					if (updating)
+					{
+						rect worldDirtyRectBounds = .(dirtyrect.X * simulationSize, dirtyrect.Y * simulationSize, dirtyrect.Width * simulationSize, dirtyrect.Height * simulationSize);
+						Core.Draw.HollowRect(worldDirtyRectBounds, 2, Color.Green);
+					}
+					Core.Draw.HollowRect(a, 1, Color.White);
 				}
 			}
-			else{
-				drawing=false;
+			else
+			{
+				drawing = false;
 			}
 		}
 	}
@@ -78,6 +159,7 @@ namespace BeefSand.lib
 		public readonly int xChunks = 0;
 		public readonly int yChunks = 0;
 
+
 		public this(int ChunkAmountX, int ChunkAmountY)
 		{
 			chunkStorage = new Chunk[ChunkAmountX, ChunkAmountY];
@@ -86,7 +168,7 @@ namespace BeefSand.lib
 				for (int y = 0; y < ChunkAmountY; y++)
 				{
 					Chunk c = new Chunk(.(x, y));
-					chunkStorage[x, y] =c;
+					chunkStorage[x, y] = c;
 				}
 			}
 			xChunks = ChunkAmountX;
@@ -100,14 +182,14 @@ namespace BeefSand.lib
 		{
 			return (chunkStorage[bounds.X / chunkWidth, bounds.Y / chunkHeight]);
 		}
-		
+
 		[Inline]
-		public Chunk FindChunkAtPoint(int2 pos)
+		public Chunk GetChunkFromPoint(int2 pos)
 		{
 			int2 roundedPos = .(
 				pos.x - pos.x % chunkWidth,
 				pos.y - pos.y % chunkHeight
-			);
+				);
 			return chunkStorage[roundedPos.x / chunkWidth, roundedPos.y / chunkHeight];
 		}
 	}

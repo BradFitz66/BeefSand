@@ -18,7 +18,7 @@ namespace BeefSand
 		{
 			r = new Random();
 
-			return Atma.Core.RunInitialScene<GameApp>("Falling Sand", chunkWidth*simulationSize, chunkHeight*simulationSize);
+			return Atma.Core.RunInitialScene<GameApp>("Falling Sand", 1280, 720);
 		}
 
 	}
@@ -52,9 +52,15 @@ namespace Atma
 				(((UInt32)Width << (UInt32)26) | ((UInt32)Width >>  (UInt32)6)) ^
 				(((UInt32)Height <<  (UInt32)7) | ((UInt32)Height >> (UInt32)25))));
 		}
+
 		static new public bool operator==(rect a, rect b)
 		{
 			return a.GetHashCode()==b.GetHashCode();
 		}
+		static new public bool operator!=(rect a, rect b)
+		{
+			return a.GetHashCode()!=b.GetHashCode();
+		}
+
 	}
 }

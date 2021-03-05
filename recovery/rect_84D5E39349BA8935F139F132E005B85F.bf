@@ -3,7 +3,7 @@ using System.Collections;
 
 namespace Atma
 {
-	public struct rect //: IEnumerable<int2>
+	public struct rect//: IEnumerable<int2>
 	{
 		public int X;
 		public int Y;
@@ -150,6 +150,23 @@ namespace Atma
 			var rect = this;
 			rect.Y = axis - (Y - axis) - Height;
 			return rect;
+		}
+
+		/// <summary>
+		///		Extends the box to encompass the specified point (if needed).
+		/// </summary>
+		/// <param name="point"></param>
+		public void Merge(int2 point) mut
+		{
+			if (point.x > Right)
+				Right = point.x;
+			else if (point.x < X)
+				X = point.x;
+
+			if (point.y > Bottom)
+				Bottom = point.y;
+			else if (point.y < Y)
+				Y = point.y;
 		}
 
 		public rect Inflate(int amount)
@@ -454,6 +471,5 @@ namespace Atma
 		{
 			return .(Min, Max);
 		}
-	
 	}
 }
